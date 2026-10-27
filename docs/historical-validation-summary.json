@@ -1,0 +1,207 @@
+{
+  "description": "Selected fields from historical local evidence; not a new experiment and not complete raw logs. Server paths, process IDs, GPU UUIDs and vLLM route details omitted.",
+  "source_artifacts": [
+    {
+      "name": "VERIFIED-GPU-SUMMARY.json",
+      "sha256": "71820a368770fa33618b0c54388e1c8b19aacab97163d335ac981b05392d076a"
+    },
+    {
+      "name": "SGLANG-Q35-COMPARISON.json",
+      "sha256": "92c5f21c14dacbcc37ebc7baf5e6b64d7f54f21a7b51441518837065e780e87f"
+    },
+    {
+      "name": "BACKEND-CONTRACT-VERIFIED.json",
+      "sha256": "6f815cce4580ea9367c9ba6c6c063d429b47c833ad63c5d5c7e431c08794ba6d"
+    }
+  ],
+  "qwen3": {
+    "scope": "Qwen3-0.6B BF16 TP1 eager single short raw prompt; not full SLLM/HTTP or future-model qualification",
+    "sglang": {
+      "same_input_ids": true,
+      "same_output_ids": [
+        true,
+        true
+      ],
+      "max_observed_token_logprob_delta": [
+        0.0,
+        0.0
+      ]
+    },
+    "modern_store_ipc": {
+      "all_311_source_tensors_exact_equal": true
+    },
+    "sglang_runtime": {
+      "torch": "2.13.0+cu130",
+      "torch_cuda": "13.0",
+      "engine": "0.5.21",
+      "cuda_initialized": false
+    },
+    "gpu_released": true
+  },
+  "qwen35": {
+    "scope": "same SGLang version, TP1 BF16 raw text, four requests including repeat and longer input; not complete qualification",
+    "requests": [
+      {
+        "input_length": 5,
+        "same_input_ids": true,
+        "same_tokens": true,
+        "top5_keys_equal": true,
+        "max_abs_logprob_error": 0.0,
+        "output_token_logprobs_equal": true,
+        "native_tokens": [
+          11751,
+          13,
+          198,
+          760,
+          6511,
+          314,
+          9338,
+          369
+        ],
+        "store_tokens": [
+          11751,
+          13,
+          198,
+          760,
+          6511,
+          314,
+          9338,
+          369
+        ]
+      },
+      {
+        "input_length": 11,
+        "same_input_ids": true,
+        "same_tokens": true,
+        "top5_keys_equal": true,
+        "max_abs_logprob_error": 0.0,
+        "output_token_logprobs_equal": true,
+        "native_tokens": [
+          1165,
+          628,
+          884,
+          279,
+          5981,
+          17955,
+          1118,
+          25
+        ],
+        "store_tokens": [
+          1165,
+          628,
+          884,
+          279,
+          5981,
+          17955,
+          1118,
+          25
+        ]
+      },
+      {
+        "input_length": 121,
+        "same_input_ids": true,
+        "same_tokens": true,
+        "top5_keys_equal": true,
+        "max_abs_logprob_error": 0.0,
+        "output_token_logprobs_equal": true,
+        "native_tokens": [
+          271,
+          248068,
+          198,
+          90700,
+          8340,
+          25,
+          271,
+          16
+        ],
+        "store_tokens": [
+          271,
+          248068,
+          198,
+          90700,
+          8340,
+          25,
+          271,
+          16
+        ]
+      },
+      {
+        "input_length": 5,
+        "same_input_ids": true,
+        "same_tokens": true,
+        "top5_keys_equal": true,
+        "max_abs_logprob_error": 0.0,
+        "output_token_logprobs_equal": true,
+        "native_tokens": [
+          11751,
+          13,
+          198,
+          760,
+          6511,
+          314,
+          9338,
+          369
+        ],
+        "store_tokens": [
+          11751,
+          13,
+          198,
+          760,
+          6511,
+          314,
+          9338,
+          369
+        ]
+      }
+    ],
+    "resources": {
+      "native": {
+        "gpu_MiB_1s_sample_max": 26368.0,
+        "cgroup_bytes_1s_sample_max": 4286943232,
+        "ready_seconds": 25.407041549682617,
+        "run_seconds": 51.53720736503601,
+        "repeated_first_logprobs_equal": true
+      },
+      "store": {
+        "gpu_MiB_1s_sample_max": 37482.0,
+        "cgroup_bytes_1s_sample_max": 30428741632,
+        "ready_seconds": 83.91805243492126,
+        "run_seconds": 95.05783438682556,
+        "repeated_first_logprobs_equal": true
+      }
+    },
+    "measured_at_epoch": 1792139649.4319036
+  },
+  "backend": {
+    "scope": "Qwen3.5-9B TP1 real backend objects; no Controller/Ray/HTTP/full migration qualification",
+    "sglang": {
+      "status": "backend_observation_returned",
+      "normal_token_ids_equal_own_native": true,
+      "normal_usage_verified": true,
+      "inflight_observed_stop": true,
+      "stop_drained": false,
+      "stop_response": {
+        "error": "ValueError: Engine disconnected without a terminal result"
+      },
+      "resume_method_result": "not_implemented",
+      "resume_input_scope": "Fixed original 5-token prompt, not a source snapshot continuation; no KV hit qualification",
+      "shutdown_inflight_observed": true,
+      "shutdown_response": {
+        "error": "ValueError: Engine disconnected without a terminal result"
+      },
+      "sample_count": 104,
+      "gpu_1s_sampled_max_MiB": 37482,
+      "cgroup_memory_1s_sampled_max_bytes": 30263779328,
+      "valid_attempt_wall_seconds": 116.68034529685974
+    },
+    "final_compute_apps_empty": true,
+    "final_gpu_memory_MiB": 0,
+    "claims_excluded": [
+      "performance ranking",
+      "all Model List qualified",
+      "KV cache hit or full token continuation",
+      "inherent SGLang inability to trace/drain",
+      "temporary path probe error charged to engine upgrade"
+    ]
+  }
+}
