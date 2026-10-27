@@ -1,0 +1,38 @@
+INFO 10-16 19:46:07 cli.py:211] Starting gRPC server
+INFO 10-16 19:46:07 server.py:40] StorageServicer: storage_path=/home/LAB/research-user/engine-route-evaluation-20261016/qwen35-stage-1792137133854569025/store, mem_pool_size=25769803776, num_thread=2, chunk_size=33554432, registration_required=False
+WARNING: Logging before InitGoogleLogging() is written to STDERR
+I20261016 19:46:08.170624 2187221 checkpoint_store.cpp:41] Number of GPUs: 1
+I20261016 19:46:08.170653 2187221 checkpoint_store.cpp:43] I/O threads: 2, chunk size: 32MB
+I20261016 19:46:08.170660 2187221 checkpoint_store.cpp:45] Storage path: "/home/LAB/research-user/engine-route-evaluation-20261016/qwen35-stage-1792137133854569025/store"
+I20261016 19:46:08.324311 2187221 checkpoint_store.cpp:71] GPU 0 UUID: 5b3578d9-81fc-d58e-966d-6492adb4e0bb
+I20261016 19:46:08.324361 2187221 pinned_memory_pool.cpp:29] Creating PinnedMemoryPool with 768 buffers of 33554432 bytes
+I20261016 19:46:13.861711 2187221 checkpoint_store.cpp:83] Memory pool created with 24GB
+INFO 10-16 19:46:13 server.py:231] Starting gRPC server on 127.0.0.1:18573
+I20261016 19:46:33.193185 2187221 model.cpp:53] Tensor file "/home/LAB/research-user/engine-route-evaluation-20261016/qwen35-stage-1792137133854569025/store/transformers/Qwen/Qwen3.5-9B/tensor.data_1" does not exist
+I20261016 19:46:33.193225 2187221 checkpoint_store.cpp:106] Model transformers/Qwen/Qwen3.5-9B is registered
+I20261016 19:46:33.193383 2187620 pinned_memory_pool.cpp:78] PinnedMemoryPool Allocate 576 buffers free buffers 192 total buffers 768
+I20261016 19:46:33.193427 2187620 model.cpp:120] Loading model transformers/Qwen/Qwen3.5-9B size 19306217472 to host
+INFO 10-16 19:46:33 server.py:114] LoadModel: success transformers/Qwen/Qwen3.5-9B with target 1
+I20261016 19:46:33.193439 2187620 model.cpp:134] Loading model transformers/Qwen/Qwen3.5-9B to host with 2 threads, 576 chunks, 33554432 chunk size, 288 chunks per thread
+I20261016 19:46:33.193521 2187621 model.cpp:155] Thread 0 starting from partition 0 offset 0
+I20261016 19:46:33.193526 2187622 model.cpp:155] Thread 1 starting from partition 0 offset 9663676416
+I20261016 19:46:33.200024 2187623 checkpoint_store.cpp:209] Loading model transformers/Qwen/Qwen3.5-9B
+INFO 10-16 19:46:33 server.py:114] LoadModel: success transformers/Qwen/Qwen3.5-9B with target 2
+I20261016 19:46:33.334272 2187623 model.cpp:269] Creating replica 6bb32253-068d-4855-ab12-b20383ee4077
+I20261016 19:46:33.334295 2187623 model.cpp:273] Creating queue for device 0
+I20261016 19:46:33.334304 2187623 model.cpp:279] Created replica 6bb32253-068d-4855-ab12-b20383ee4077
+I20261016 19:46:33.334367 2187623 model.cpp:290] Dispatcher started for model transformers/Qwen/Qwen3.5-9B
+I20261016 19:46:33.334394 2187623 model.cpp:343] Waiting for model transformers/Qwen/Qwen3.5-9B num tasks 1 state 3
+I20261016 19:47:07.579886 2187620 model.cpp:250] Finished loading model transformers/Qwen/Qwen3.5-9B from disk
+I20261016 19:47:07.580437 2187625 model.cpp:336] Finished loading tensor from memory to device 0
+INFO 10-16 19:47:07 server.py:137] Confirm model transformers/Qwen/Qwen3.5-9B replica 6bb32253-068d-4855-ab12-b20383ee4077 success
+INFO 10-16 19:47:49 server.py:114] LoadModel: success transformers/Qwen/Qwen3.5-9B with target 1
+I20261016 19:47:49.408492 2188497 checkpoint_store.cpp:209] Loading model transformers/Qwen/Qwen3.5-9B
+INFO 10-16 19:47:49 server.py:114] LoadModel: success transformers/Qwen/Qwen3.5-9B with target 2
+I20261016 19:47:49.542994 2188497 model.cpp:269] Creating replica e7b0579b-f339-434b-8f02-a82f12153f76
+I20261016 19:47:49.543026 2188497 model.cpp:273] Creating queue for device 0
+I20261016 19:47:49.543033 2188497 model.cpp:279] Created replica e7b0579b-f339-434b-8f02-a82f12153f76
+I20261016 19:47:49.543089 2188497 model.cpp:290] Dispatcher started for model transformers/Qwen/Qwen3.5-9B
+I20261016 19:47:49.543107 2188497 model.cpp:343] Waiting for model transformers/Qwen/Qwen3.5-9B num tasks 1 state 3
+I20261016 19:47:50.321336 2188499 model.cpp:336] Finished loading tensor from memory to device 0
+INFO 10-16 19:47:50 server.py:137] Confirm model transformers/Qwen/Qwen3.5-9B replica e7b0579b-f339-434b-8f02-a82f12153f76 success

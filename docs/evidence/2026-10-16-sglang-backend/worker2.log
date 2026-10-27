@@ -1,0 +1,11 @@
+[2026-10-16 19:47:49] using attn output gate!
+DEBUG 10-16 19:47:49 torch.py:137] allocate_cuda_memory takes 0.001604318618774414 seconds
+DEBUG 10-16 19:47:49 client.py:78] load_into_gpu: transformers/Qwen/Qwen3.5-9B, e7b0579b-f339-434b-8f02-a82f12153f76
+INFO 10-16 19:47:49 client.py:119] Model loaded: transformers/Qwen/Qwen3.5-9B, e7b0579b-f339-434b-8f02-a82f12153f76
+INFO 10-16 19:47:49 torch.py:160] restore state_dict takes 0.006348848342895508 seconds
+INFO 10-16 19:47:49 client.py:123] confirm_model_loaded: transformers/Qwen/Qwen3.5-9B, e7b0579b-f339-434b-8f02-a82f12153f76
+INFO 10-16 19:47:50 client.py:131] Model loaded
+[2026-10-16 19:47:54] SIGTERM received. signum=None frame=None. Draining requests and shutting down...
+[2026-10-16 19:47:54] Subprocess scheduler_0 (pid=2188318) crashed with exit code -15. Triggering SIGQUIT for cleanup...
+[2026-10-16 19:47:54] SIGQUIT received. signum=None, frame=None. It usually means one child failed.
+[2026-10-16 19:47:59] No live scheduler processes found; skipping py-spy and CUDA coredump.

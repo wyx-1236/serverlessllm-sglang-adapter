@@ -10,3 +10,6 @@ __pycache__/
 *.bin
 *.pt
 *.pth
+
+# Reviewed historical evidence logs are intentionally published.
+!docs/evidence/2026-10-16-sglang-backend/*.log

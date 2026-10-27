@@ -1,0 +1,20 @@
+[2026-10-16 19:46:33] using attn output gate!
+DEBUG 10-16 19:46:33 torch.py:137] allocate_cuda_memory takes 0.0015392303466796875 seconds
+DEBUG 10-16 19:46:33 client.py:78] load_into_gpu: transformers/Qwen/Qwen3.5-9B, 6bb32253-068d-4855-ab12-b20383ee4077
+INFO 10-16 19:46:33 client.py:119] Model loaded: transformers/Qwen/Qwen3.5-9B, 6bb32253-068d-4855-ab12-b20383ee4077
+INFO 10-16 19:46:33 torch.py:160] restore state_dict takes 0.006347179412841797 seconds
+INFO 10-16 19:46:33 client.py:123] confirm_model_loaded: transformers/Qwen/Qwen3.5-9B, 6bb32253-068d-4855-ab12-b20383ee4077
+INFO 10-16 19:47:07 client.py:131] Model loaded
+/home/LAB/research-user/engine-route-evaluation-20261016/gpu-stage-1792134963172195358/sglang-venv/lib/python3.12/site-packages/triton/language/core.py:2284: UserWarning: tl.make_block_ptr is deprecated. Use TensorDescriptor or tl.make_tensor_descriptor instead.
+  warn("tl.make_block_ptr is deprecated. Use TensorDescriptor or tl.make_tensor_descriptor instead.")
+[2026-10-16 19:47:13] Triton kernel 'chunk_gated_delta_rule_fwd_kkt_solve_kernel' took 1.23 s to compile after serving started. Serving-time compilation can stall the engine; pre-compile it during engine init.
+[2026-10-16 19:47:14] Triton kernel 'chunk_gated_delta_rule_fwd_kkt_solve_kernel' took 1.23 s to compile after serving started. Serving-time compilation can stall the engine; pre-compile it during engine init.
+[2026-10-16 19:47:16] Triton kernel 'chunk_gated_delta_rule_fwd_kkt_solve_kernel' took 1.22 s to compile after serving started. Serving-time compilation can stall the engine; pre-compile it during engine init.
+[2026-10-16 19:47:17] Triton kernel 'chunk_gated_delta_rule_fwd_kkt_solve_kernel' took 1.35 s to compile after serving started. Serving-time compilation can stall the engine; pre-compile it during engine init.
+[2026-10-16 19:47:18] Triton kernel 'chunk_gated_delta_rule_fwd_kkt_solve_kernel' took 1.31 s to compile after serving started. Serving-time compilation can stall the engine; pre-compile it during engine init.
+[2026-10-16 19:47:20] Triton kernel 'chunk_gated_delta_rule_fwd_kkt_solve_kernel' took 1.26 s to compile after serving started. Serving-time compilation can stall the engine; pre-compile it during engine init.
+[2026-10-16 19:47:23] Triton kernel '_fwd_kernel' took 1.01 s to compile after serving started. Serving-time compilation can stall the engine; pre-compile it during engine init.
+[2026-10-16 19:47:25] SIGTERM received. signum=None frame=None. Draining requests and shutting down...
+[2026-10-16 19:47:25] Subprocess scheduler_0 (pid=2187466) crashed with exit code -15. Triggering SIGQUIT for cleanup...
+[2026-10-16 19:47:25] SIGQUIT received. signum=None, frame=None. It usually means one child failed.
+[2026-10-16 19:47:30] No live scheduler processes found; skipping py-spy and CUDA coredump.

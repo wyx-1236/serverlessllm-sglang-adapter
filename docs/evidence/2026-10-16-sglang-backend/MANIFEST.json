@@ -1,0 +1,89 @@
+{
+  "description": "Historical server artifacts, publication copies. No new experiment. Complete file bodies retained except the explicitly listed literal substitutions; originals remain outside the repository.",
+  "source_archive": "backend-contract-gpu-evidence.zip",
+  "source_observation": "backend-contract-stage-20261016-01/observation",
+  "source_run": "gpu-sglang-1792151165157728592",
+  "redactions": {
+    "server_account_path": "/home/LAB/<original-account> -> /home/LAB/research-user",
+    "physical_gpu_uuid": "GPU-<physical-device-uuid> -> GPU-00000000-0000-0000-0000-000000000000"
+  },
+  "files": [
+    {
+      "path": "result.json",
+      "original_relative_path": "gpu-sglang-1792151165157728592/result.json",
+      "original_sha256": "3fc8e875aea0dce09d5f6121d3dc01a76173c7bcf12aa77930536a8dac8a87ea",
+      "published_sha256": "fdfae78bb3c4a9f6df99fc124527da45e917ff81fdaf46e87b39363c0b754f40",
+      "original_bytes": 7778,
+      "published_bytes": 7798,
+      "account_path_substitutions": 4,
+      "physical_gpu_uuid_substitutions": 2,
+      "line_count_unchanged": true
+    },
+    {
+      "path": "worker1.log",
+      "original_relative_path": "gpu-sglang-1792151165157728592/worker1.log",
+      "original_sha256": "f78e9b265fc29539533b87b0df461cae15c6c9ea83dcfef4eda7d48a80b005fa",
+      "published_sha256": "fefbe92132bf01f78dea3a2f94528f4c5893b50303b9dd8f0bfb9e1401b7a084",
+      "original_bytes": 2845,
+      "published_bytes": 2850,
+      "account_path_substitutions": 1,
+      "physical_gpu_uuid_substitutions": 0,
+      "line_count_unchanged": true
+    },
+    {
+      "path": "worker2.log",
+      "original_relative_path": "gpu-sglang-1792151165157728592/worker2.log",
+      "original_sha256": "90b71ad497815a225c12a0a1b70090b774ab844ae898eb6639e589c5ee6d81a9",
+      "published_sha256": "90b71ad497815a225c12a0a1b70090b774ab844ae898eb6639e589c5ee6d81a9",
+      "original_bytes": 1046,
+      "published_bytes": 1046,
+      "account_path_substitutions": 0,
+      "physical_gpu_uuid_substitutions": 0,
+      "line_count_unchanged": true
+    },
+    {
+      "path": "store-server.log",
+      "original_relative_path": "gpu-sglang-1792151165157728592/store-server.log",
+      "original_sha256": "d2c1f610308a55b90d637de731e95cc6f0f4257cc104b97e0e53aecfa3253a86",
+      "published_sha256": "efa9861030a5428157aadda4e8494ed76795a5f01259353015ccf9308ee22214",
+      "original_bytes": 4201,
+      "published_bytes": 4216,
+      "account_path_substitutions": 3,
+      "physical_gpu_uuid_substitutions": 0,
+      "line_count_unchanged": true
+    },
+    {
+      "path": "gpu-samples.json",
+      "original_relative_path": "gpu-sglang-1792151165157728592/gpu-samples.json",
+      "original_sha256": "400f6e74ab8d249a4da2ea919970a6a2e985532efd4b70616e6ced5f52a2da2a",
+      "published_sha256": "400f6e74ab8d249a4da2ea919970a6a2e985532efd4b70616e6ced5f52a2da2a",
+      "original_bytes": 8702,
+      "published_bytes": 8702,
+      "account_path_substitutions": 0,
+      "physical_gpu_uuid_substitutions": 0,
+      "line_count_unchanged": true
+    },
+    {
+      "path": "experiment-process.log",
+      "original_relative_path": "engine-backend-sglang-1792151164897685840.log",
+      "original_sha256": "2b4603ecf681d32fc247399313cb90f23b0c615a9fbd6b25c0e76c20d82a5564",
+      "published_sha256": "eb2a9a7ca58f977f523e100b076f840115c50cef2c8d9b7b99b144fc7d29f85d",
+      "original_bytes": 3955,
+      "published_bytes": 3990,
+      "account_path_substitutions": 7,
+      "physical_gpu_uuid_substitutions": 0,
+      "line_count_unchanged": true
+    },
+    {
+      "path": "backend_gpu_probe_v4.py",
+      "original_relative_path": "backend_gpu_probe_v4.py",
+      "original_sha256": "f21f5769d30a8f0bed7c3797b3198b0afa73e09830539b56fde035abe24a638b",
+      "published_sha256": "37e9bc164d7bb8607f4f15e686dcce100978b019a4508c915276e38eb22ed428",
+      "original_bytes": 12465,
+      "published_bytes": 12480,
+      "account_path_substitutions": 3,
+      "physical_gpu_uuid_substitutions": 1,
+      "line_count_unchanged": true
+    }
+  ]
+}

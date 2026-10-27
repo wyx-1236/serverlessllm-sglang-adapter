@@ -1,0 +1,58 @@
+Running as unit: engine-backend-sglang-1792151164897685840.service
+Timeout (0:00:45)!
+Thread 0x00007fef06ffd640 (most recent call first):
+  File "/usr/lib/python3.10/asyncio/unix_events.py", line 1392 in _do_waitpid
+  File "/usr/lib/python3.10/threading.py", line 953 in run
+  File "/usr/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/usr/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00007fef17a1c640 (most recent call first):
+  File "/usr/lib/python3.10/threading.py", line 324 in wait
+  File "/usr/lib/python3.10/threading.py", line 607 in wait
+  File "/home/LAB/research-user/engine-route-evaluation-20261016/backend-contract-stage-20261016-01/observation/backend_gpu_probe_v4.py", line 38 in sample
+  File "/usr/lib/python3.10/threading.py", line 953 in run
+  File "/usr/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/usr/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00007fef18fa21c0 (most recent call first):
+  File "/usr/lib/python3.10/selectors.py", line 469 in select
+  File "/usr/lib/python3.10/asyncio/base_events.py", line 1871 in _run_once
+  File "/usr/lib/python3.10/asyncio/base_events.py", line 603 in run_forever
+  File "/usr/lib/python3.10/asyncio/base_events.py", line 636 in run_until_complete
+  File "/usr/lib/python3.10/asyncio/runners.py", line 44 in run
+  File "/home/LAB/research-user/engine-route-evaluation-20261016/backend-contract-stage-20261016-01/observation/backend_gpu_probe_v4.py", line 129 in main
+  File "/home/LAB/research-user/engine-route-evaluation-20261016/backend-contract-stage-20261016-01/observation/backend_gpu_probe_v4.py", line 143 in <module>
+Timeout (0:00:45)!
+Thread 0x00007fef06ffd640 (most recent call first):
+  File "/usr/lib/python3.10/asyncio/unix_events.py", line 1392 in _do_waitpid
+  File "/usr/lib/python3.10/threading.py", line 953 in run
+  File "/usr/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/usr/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00007fef05ffb640 (most recent call first):
+  File "/usr/lib/python3.10/concurrent/futures/thread.py", line 81 in _worker
+  File "/usr/lib/python3.10/threading.py", line 953 in run
+  File "/usr/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/usr/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00007fef17a1c640 (most recent call first):
+  File "/usr/lib/python3.10/threading.py", line 324 in wait
+  File "/usr/lib/python3.10/threading.py", line 607 in wait
+  File "/home/LAB/research-user/engine-route-evaluation-20261016/backend-contract-stage-20261016-01/observation/backend_gpu_probe_v4.py", line 38 in sample
+  File "/usr/lib/python3.10/threading.py", line 953 in run
+  File "/usr/lib/python3.10/threading.py", line 1016 in _bootstrap_inner
+  File "/usr/lib/python3.10/threading.py", line 973 in _bootstrap
+
+Thread 0x00007fef18fa21c0 (most recent call first):
+  File "/usr/lib/python3.10/selectors.py", line 469 in select
+  File "/usr/lib/python3.10/asyncio/base_events.py", line 1871 in _run_once
+  File "/usr/lib/python3.10/asyncio/base_events.py", line 603 in run_forever
+  File "/usr/lib/python3.10/asyncio/base_events.py", line 636 in run_until_complete
+  File "/usr/lib/python3.10/asyncio/runners.py", line 44 in run
+  File "/home/LAB/research-user/engine-route-evaluation-20261016/backend-contract-stage-20261016-01/observation/backend_gpu_probe_v4.py", line 129 in main
+  File "/home/LAB/research-user/engine-route-evaluation-20261016/backend-contract-stage-20261016-01/observation/backend_gpu_probe_v4.py", line 143 in <module>
+{"engine": "sglang", "status": "backend_observation_returned", "result": "/home/LAB/research-user/engine-route-evaluation-20261016/backend-contract-stage-20261016-01/observation/gpu-sglang-1792151165157728592/result.json", "error_tail": ""}
+Finished with result: success
+Main processes terminated with: code=exited/status=0
+Service runtime: 1min 56.879s
+CPU time consumed: 1min 40.238s

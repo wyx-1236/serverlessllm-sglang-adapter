@@ -92,6 +92,49 @@ Qwen3.5 Store 阶段 GPU 显存的 1 秒采样最大值为 **37,482 MiB（约 36
 
 恢复验证还受到 Store 文件准备路径的限制：历史原生 writer 曾产生不完整文件，研究阶段用 CPU 参考 writer 完成后续验证。**Store 恢复成功不能扩大为原版快速写入/导出路径已修复。** CPU 参考 writer 未随本次适配源码归档提供。
 
+### 3.1 停止、跟踪与重放问题的逐项原始证据
+
+公开的[证据目录与文件说明](evidence/2026-10-16-sglang-backend/README.md)包含同一次实验的完整文件副本，不再只有摘要。仅对服务器账号路径和物理 GPU UUID 做明确替换；时间、请求、错误、测试步骤和行数保持原样，原件及公开副本 SHA256 见 [MANIFEST](evidence/2026-10-16-sglang-backend/MANIFEST.json)。以下链接可在 GitHub 直接定位行号。
+
+**① 活动 token 跟踪：确实未实现，不是推测。**
+
+[测试脚本第99–102行](evidence/2026-10-16-sglang-backend/backend_gpu_probe_v4.py#L99-L102)先发起最多 64 token 的请求，等到首个 chunk 后调用 `get_current_tokens()`；捕获 `NotImplementedError` 后写入 `not_implemented`。[请求结果第181–196行](evidence/2026-10-16-sglang-backend/result.json#L181-L196)既记录了首 chunk（说明请求已在执行），也记录了 `"token_trace": "not_implemented"`。对应[后端方法第155–156行](../research/backend-contract/candidate/sllm/backends/sglang_backend.py#L155-L156)直接抛出该异常。
+
+这证明当前适配层没有向 SLLM 提供迁移所需的活动 token 快照。它不证明 SGLang 引擎缺少实现这种适配所需的基础接口；普通流已经能提供 token chunk。
+
+**② stop 未保持排空语义：worker 被终止，活动请求没有正常终态。**
+
+[脚本第103–107行](evidence/2026-10-16-sglang-backend/backend_gpu_probe_v4.py#L103-L107)在活动请求期间调用 `stop()`，随后读取该请求结果。[结果第197–204行](evidence/2026-10-16-sglang-backend/result.json#L197-L204)记录：
+
+```json
+"response": {
+  "error": "ValueError: Engine disconnected without a terminal result"
+},
+"drained_normal_response": false
+```
+
+[worker1 日志第17–20行](evidence/2026-10-16-sglang-backend/worker1.log#L17-L20)记录 `SIGTERM received`，继而 scheduler 以 `-15` 退出并触发清理。对应[后端第128–150行](../research/backend-contract/candidate/sllm/backends/sglang_backend.py#L128-L150)中，`stop()` 调用 `shutdown()`，后者终止所属进程组；不是等待请求自然完成后再关闭。
+
+上述源码、调用步骤和结果共同支持“当前 stop 未保留原方案排空语义”的结论。日志中的 `Draining requests and shutting down` 是引擎收到信号后的日志文字，不能替代请求成功排空的结果证据；`generation_finished_on_stop_return: true` 也只表示任务已结束，错误结束仍算结束。
+
+**③ 重放/预热：候选方法直接未实现，没有发生一次成功重放。**
+
+[脚本第109–113行](evidence/2026-10-16-sglang-backend/backend_gpu_probe_v4.py#L109-L113)重新启动后端，调用 `resume_kv_cache([input_ids])` 并捕获未实现异常。[结果第207–208行](evidence/2026-10-16-sglang-backend/result.json#L207-L208)记录 `"op": "resume_token_replay"`、`"result": "not_implemented"`，与[后端第158–159行](../research/backend-contract/candidate/sllm/backends/sglang_backend.py#L158-L159)一致。
+
+这里输入是固定 prompt，不是源实例的活动快照。因此证据能说明候选恢复入口缺失，不能把它描述成“完整跨实例迁移跑到中途失败”，也不能据此判断真实缓存命中。
+
+**④ 活动请求 shutdown：同样没有返回约定的请求终态。**
+
+[脚本第114–118行](evidence/2026-10-16-sglang-backend/backend_gpu_probe_v4.py#L114-L118)发起另一活动请求并确认首 chunk，然后调用 `shutdown()`。[结果第211–230行](evidence/2026-10-16-sglang-backend/result.json#L211-L230)记录该请求已开始输出，随后返回同样的缺失终态错误。[worker2 日志第8–11行](evidence/2026-10-16-sglang-backend/worker2.log#L8-L11)记录终止信号和 `-15` 退出。
+
+这证明当前实现没有给活动请求正常的取消终态，不能据此认定 SG 没有请求级 abort 接口；[请求传输实现](../research/backend-contract/candidate/sllm_sglang/runtime.py)另有断连时调用原生 abort 的路径，它与后端整体 shutdown 的语义不同。
+
+**⑤ 观察程序成功退出，不代表上述功能通过。**
+
+[实验进程日志](evidence/2026-10-16-sglang-backend/experiment-process.log)保留线程栈及最终退出记录。其中 `Timeout (0:00:45)!` 来自[脚本第30行](evidence/2026-10-16-sglang-backend/backend_gpu_probe_v4.py#L30)的 `faulthandler.dump_traceback_later(45, repeat=True)`，是定时诊断，不是本次断连的错误根因。末尾 `Finished with result: success` 和[结果状态](evidence/2026-10-16-sglang-backend/result.json#L234)只表示观察流程返回并保存结果；测试程序会把不支持的能力和错误响应作为观察数据保存。
+
+[普通请求结果](evidence/2026-10-16-sglang-backend/result.json#L7-L179)与这些失败记录位于同一文件，避免只展示失败片段。另有 [Store 日志](evidence/2026-10-16-sglang-backend/store-server.log)和 [104 条资源采样](evidence/2026-10-16-sglang-backend/gpu-samples.json)用于核对运行过程；本轮仍未启动 Controller/Ray/HTTP 全链。上述脚本作为历史实验材料保存，脱敏后不能直接执行复现，具体缺失环境见证据目录说明。
+
 ## 4. 尚未完成的适配及建议验收条件
 
 以下是后续实施工作，不是已经承诺实现的能力或工期。

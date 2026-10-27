@@ -1,0 +1,268 @@
+{
+  "engine": "sglang",
+  "started_epoch": 1792151165.1578274,
+  "scope": "real backend object/worker/Store lifecycle; Controller/Ray/HTTP are not started",
+  "operations": [
+    {
+      "op": "normal_request",
+      "response": {
+        "id": "chatcmpl-normal",
+        "object": "chat.completion",
+        "created": 1792151245,
+        "model": "Qwen3.5-9B-route-research",
+        "choices": [
+          {
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": " Paris.\nThe capital of France is"
+            },
+            "finish_reason": "length"
+          }
+        ],
+        "usage": {
+          "prompt_tokens": 5,
+          "completion_tokens": 8,
+          "total_tokens": 13
+        },
+        "baseline": {
+          "protocol": "crosspool-preflight-v1",
+          "engine": "sglang",
+          "input_ids": [
+            760,
+            6511,
+            314,
+            9338,
+            369
+          ],
+          "output_ids": [
+            11751,
+            13,
+            198,
+            760,
+            6511,
+            314,
+            9338,
+            369
+          ],
+          "stream_text_tail": "",
+          "generation_completed_monotonic_ns": 3207608188167843,
+          "native_meta_info": {
+            "id": "normal",
+            "finish_reason": {
+              "type": "length",
+              "length": 8
+            },
+            "prompt_tokens": 5,
+            "weight_version": "default",
+            "num_retractions": 0,
+            "reasoning_tokens": 0,
+            "completion_tokens": 8,
+            "cached_tokens": 0,
+            "weight_versions": [
+              {
+                "version": "default",
+                "start": 0,
+                "end": 8
+              }
+            ],
+            "cached_tokens_details": null,
+            "dp_rank": null,
+            "e2e_latency": 15.421288281213492,
+            "native_request_id": "0f1e014cc1264b93ba67e2f7706874e3"
+          },
+          "timing_capability": "chunks; per-token TBT unqualified"
+        }
+      },
+      "stream_chunks": [
+        {
+          "type": "token_chunk",
+          "request_id": "normal",
+          "sequence": 1,
+          "token_ids": [
+            11751
+          ],
+          "text_delta": " Paris",
+          "generated_monotonic_ns": 3207607869897421,
+          "timestamp_boundary": "native_engine_stream_observed"
+        },
+        {
+          "type": "token_chunk",
+          "request_id": "normal",
+          "sequence": 2,
+          "token_ids": [
+            13
+          ],
+          "text_delta": ".",
+          "generated_monotonic_ns": 3207608033646976,
+          "timestamp_boundary": "native_engine_stream_observed"
+        },
+        {
+          "type": "token_chunk",
+          "request_id": "normal",
+          "sequence": 3,
+          "token_ids": [
+            198
+          ],
+          "text_delta": "\n",
+          "generated_monotonic_ns": 3207608059811809,
+          "timestamp_boundary": "native_engine_stream_observed"
+        },
+        {
+          "type": "token_chunk",
+          "request_id": "normal",
+          "sequence": 4,
+          "token_ids": [
+            760
+          ],
+          "text_delta": "The",
+          "generated_monotonic_ns": 3207608085611769,
+          "timestamp_boundary": "native_engine_stream_observed"
+        },
+        {
+          "type": "token_chunk",
+          "request_id": "normal",
+          "sequence": 5,
+          "token_ids": [
+            6511
+          ],
+          "text_delta": " capital",
+          "generated_monotonic_ns": 3207608110992466,
+          "timestamp_boundary": "native_engine_stream_observed"
+        },
+        {
+          "type": "token_chunk",
+          "request_id": "normal",
+          "sequence": 6,
+          "token_ids": [
+            314
+          ],
+          "text_delta": " of",
+          "generated_monotonic_ns": 3207608136475114,
+          "timestamp_boundary": "native_engine_stream_observed"
+        },
+        {
+          "type": "token_chunk",
+          "request_id": "normal",
+          "sequence": 7,
+          "token_ids": [
+            9338
+          ],
+          "text_delta": " France",
+          "generated_monotonic_ns": 3207608162144569,
+          "timestamp_boundary": "native_engine_stream_observed"
+        },
+        {
+          "type": "token_chunk",
+          "request_id": "normal",
+          "sequence": 8,
+          "token_ids": [
+            369
+          ],
+          "text_delta": " is",
+          "generated_monotonic_ns": 3207608188167843,
+          "timestamp_boundary": "native_engine_stream_observed"
+        }
+      ],
+      "captured_output": null,
+      "expected_token_ids": [
+        11751,
+        13,
+        198,
+        760,
+        6511,
+        314,
+        9338,
+        369
+      ],
+      "tokens_equal_reference": true
+    },
+    {
+      "op": "token_trace_and_stop_drain",
+      "inflight_observation": {
+        "observed": true,
+        "first_chunk": {
+          "type": "token_chunk",
+          "request_id": "trace-and-drain",
+          "sequence": 1,
+          "token_ids": [
+            11751
+          ],
+          "text_delta": " Paris",
+          "generated_monotonic_ns": 3207608260786967,
+          "timestamp_boundary": "native_engine_stream_observed"
+        }
+      },
+      "token_trace": "not_implemented",
+      "stop_seconds": 5.519123554229736,
+      "generation_finished_on_stop_return": true,
+      "gpu_apps_after_stop": "GPU-00000000-0000-0000-0000-000000000000, 2187221, /home/LAB/research-user/serverlessllm-work/campaign-20261010-01/venv/bin/python, 416 MiB\n",
+      "response": {
+        "error": "ValueError: Engine disconnected without a terminal result"
+      },
+      "captured_output": null,
+      "drained_normal_response": false
+    },
+    {
+      "op": "resume_token_replay",
+      "result": "not_implemented"
+    },
+    {
+      "op": "shutdown_during_request",
+      "inflight_observation": {
+        "observed": true,
+        "first_chunk": {
+          "type": "token_chunk",
+          "request_id": "shutdown-active",
+          "sequence": 1,
+          "token_ids": [
+            11751
+          ],
+          "text_delta": " Paris",
+          "generated_monotonic_ns": 3207636770493407,
+          "timestamp_boundary": "native_engine_stream_observed"
+        }
+      },
+      "shutdown_seconds": 5.740399360656738,
+      "gpu_apps_after_shutdown": "GPU-00000000-0000-0000-0000-000000000000, 2187221, /home/LAB/research-user/serverlessllm-work/campaign-20261010-01/venv/bin/python, 416 MiB\n",
+      "response": {
+        "error": "ValueError: Engine disconnected without a terminal result"
+      },
+      "captured_output": null
+    }
+  ],
+  "status": "backend_observation_returned",
+  "copy_delta": {
+    "purpose": "Research copies for backend lifecycle observation, not production implementation",
+    "vllm": [
+      "Counter import to itertools.count",
+      "Omit removed task only for default auto; reject other tasks",
+      "Original shutdown/stop/request logic preserved for observation"
+    ],
+    "sglang": [
+      "Same Qwen3.5 architecture/dtype loader already GPU verified",
+      "Resource re-admission 16->64GiB; context/capacity 512",
+      "Explicit standalone mode instead of an MPS-only candidate guard",
+      "Original stop/trace/replay/request logic preserved for observation"
+    ]
+  },
+  "input_ids": [
+    760,
+    6511,
+    314,
+    9338,
+    369
+  ],
+  "eos_token_id": [
+    248044
+  ],
+  "pad_token_id": 248044,
+  "private_socket_directories": [
+    "/home/LAB/research-user/.be-cd2b81e9cc50",
+    "/home/LAB/research-user/.be-dfbd2461f092"
+  ],
+  "initial_ready_seconds": 55.240750312805176,
+  "captures": [],
+  "store_exit_code": -15,
+  "ended_epoch": 1792151281.8381727
+}
