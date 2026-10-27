@@ -1,0 +1,390 @@
+{
+  "upstream": "https://github.com/ServerlessLLM/ServerlessLLM",
+  "upstream_commit": "9f50241baa5386e06a9321c51f19a9ef5f964c2b",
+  "files": [
+    {
+      "path": "sllm/__init__.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/__init__.py",
+      "sha256": "443c88507f3d7181ca4fad8fdea634f77ac48578e89bccffe0f90dbe932ffa40"
+    },
+    {
+      "path": "sllm/app_lib.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/app_lib.py",
+      "sha256": "2985237a977b21e666433474362435e04cd6bb311270a6233b647cfcd49b4295"
+    },
+    {
+      "path": "sllm/backends/__init__.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/backends/__init__.py",
+      "sha256": "bee3c80cdbd561875e4fce2541fedbefc9d5e448cb43618a9df4a412a906e450"
+    },
+    {
+      "path": "sllm/backends/backend_utils.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/backends/backend_utils.py",
+      "sha256": "0994086b56b19b69ce7baa12d11bb53ed93d061b9419e44a8a19bbfde42f098d"
+    },
+    {
+      "path": "sllm/backends/baseline_request.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/backends/baseline_request.py",
+      "sha256": "e19f8932875b5b0241d0aafd9c1e8c2c85ba7e62b454385a3a9b3b57f016f3de"
+    },
+    {
+      "path": "sllm/backends/dummy_backend.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/backends/dummy_backend.py",
+      "sha256": "6495efe4258af1dd1279c5ac934af5bb3e2c0d595d025c0372fd035963007369"
+    },
+    {
+      "path": "sllm/backends/sglang_backend.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/backends/sglang_backend.py",
+      "sha256": "df9be1c25b3f00f8098f3008a91a2d5488ff6613746d67a616102aa0ff681e9b"
+    },
+    {
+      "path": "sllm/backends/transformers_backend.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/backends/transformers_backend.py",
+      "sha256": "fbcb48f32241080cca943a4f503711c28ace662560a8f31811ed5d4d46f52521"
+    },
+    {
+      "path": "sllm/backends/vllm_backend.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/backends/vllm_backend.py",
+      "sha256": "daedf53b07dc4e20393f53cdc8a35d77941ec0cb238a1a32ceffcf9ca74f9ff6"
+    },
+    {
+      "path": "sllm/cli/__init__.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/cli/__init__.py",
+      "sha256": "cffde8550f745b4bb62fe8bb15b065d78898980f56f2c558c1ae7e45752678e4"
+    },
+    {
+      "path": "sllm/cli/_cli_utils.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/cli/_cli_utils.py",
+      "sha256": "9b82b1bf3c747c136d8f6668f4b3f8fa0277ec6017762f25f1fccfc88326c91b"
+    },
+    {
+      "path": "sllm/cli/clic.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/cli/clic.py",
+      "sha256": "9b309d2025a604d2372be5ecee0ac4778e9dd262e5913573ff907b109e49d3d1"
+    },
+    {
+      "path": "sllm/controller.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/controller.py",
+      "sha256": "006e670bcfe2dbbb5b897fe2ac0b87dbc6814d96f66c69810f12ec346cf756fa"
+    },
+    {
+      "path": "sllm/fine_tuning_instance.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/fine_tuning_instance.py",
+      "sha256": "30839846f426fe362ebdfb9f8e9ab08f67bce18749b793d0bdf0c9438ea34961"
+    },
+    {
+      "path": "sllm/fine_tuning_job_store.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/fine_tuning_job_store.py",
+      "sha256": "fa8865302770514e4237c0a9f0fcb0348ae6608a7b423c8f2bca0b98fe4b1528"
+    },
+    {
+      "path": "sllm/ft_backends/__init__.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/ft_backends/__init__.py",
+      "sha256": "e3bbfbac6e6bbb54b227d41f234734ccad7c486a9f12a5413c777a69f42a4a6a"
+    },
+    {
+      "path": "sllm/ft_backends/backend_utils.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/ft_backends/backend_utils.py",
+      "sha256": "b1885964096381862f40b63d1fb8e63ca6ca6b2f81d540cf01d1b36d32986e48"
+    },
+    {
+      "path": "sllm/ft_backends/peft_lora_backend.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/ft_backends/peft_lora_backend.py",
+      "sha256": "c9b2633050cf33a82ee4a65b2eac36810c2b326d47f56d9265d2e76332e9ad83"
+    },
+    {
+      "path": "sllm/hardware_info_collector.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/hardware_info_collector.py",
+      "sha256": "370f73ce4a8e545cb3c1b6a82d66e8b27c298dafc71606386b06449814828545"
+    },
+    {
+      "path": "sllm/inference_instance.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/inference_instance.py",
+      "sha256": "ce6a3d41ed6d48ef768c78f9b6b0d043303559780f9a8e5541e41099e055bf6e"
+    },
+    {
+      "path": "sllm/logger.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/logger.py",
+      "sha256": "40df8ad65d0167de4ad46357ee224acd3b7bddca2d34fee26c63300f12700815"
+    },
+    {
+      "path": "sllm/model_downloader.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/model_downloader.py",
+      "sha256": "353649e8bda84450491ba7724e336c54746cb561ea61f6a1073e5c73bf4701a9"
+    },
+    {
+      "path": "sllm/routers/__init__.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/routers/__init__.py",
+      "sha256": "7f970f514b5f6a2c0729a1230749dcc9b0703d2cb7165ad916091af0b1bee091"
+    },
+    {
+      "path": "sllm/routers/migration_router.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/routers/migration_router.py",
+      "sha256": "e7570e0c000cd6727a4fb10a11ac56953661c2258246a147dcd06a422ce63624"
+    },
+    {
+      "path": "sllm/routers/roundrobin_router.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/routers/roundrobin_router.py",
+      "sha256": "67441387a03f82a92192c225f3ebc5f9223b674dd6a3087092fa00c15458f210"
+    },
+    {
+      "path": "sllm/routers/router_utils.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/routers/router_utils.py",
+      "sha256": "5ce6b8f7b6563089a086d24d5ae90636dfad53d68a67cdcc22210a38fd62d182"
+    },
+    {
+      "path": "sllm/schedulers/__init__.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/schedulers/__init__.py",
+      "sha256": "59dd425e297df8ef90e2993c788000d1f982fe2c4fe2862138c24ac8b53a7ddf"
+    },
+    {
+      "path": "sllm/schedulers/fcfs_scheduler.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/schedulers/fcfs_scheduler.py",
+      "sha256": "d1ee169258e05d44526149ab5a0a94fb491d53a55e647eac2827ad9ac0b5e13d"
+    },
+    {
+      "path": "sllm/schedulers/scheduler_utils.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/schedulers/scheduler_utils.py",
+      "sha256": "baab8c1f66c197f4a56d3dfc8d3e87fd223294df20e11596f7a701cd9034b95d"
+    },
+    {
+      "path": "sllm/schedulers/storage_aware_scheduler.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/schedulers/storage_aware_scheduler.py",
+      "sha256": "b7779e41f451a3328eb73337533d6d9b117aafe6ee6b78f9b28e9b5f5e2b0567"
+    },
+    {
+      "path": "sllm/store_manager.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/store_manager.py",
+      "sha256": "88d36d8dd459d92d4e7b489a3f4dd101a13c677e8e86331d9110617ed0c08715"
+    },
+    {
+      "path": "sllm/utils.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm/utils.py",
+      "sha256": "e3ebd803ee06f6665aaa51e586911e1049a5f2c118b612d750a25deff7d008fc"
+    },
+    {
+      "path": "sllm_sglang/__init__.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm_sglang/__init__.py",
+      "sha256": "946fab3110e6f222210e82035c830e449322d5036913cd80d8fd71953faf2f0b"
+    },
+    {
+      "path": "sllm_sglang/config.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm_sglang/config.py",
+      "sha256": "34991eb024de11fd48214c4901ce5f08f6235f16d25e0a3700f8a88a6ee68526"
+    },
+    {
+      "path": "sllm_sglang/http_stream.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm_sglang/http_stream.py",
+      "sha256": "c267a4c7b0152023cb2a359780033cafa392783c0f7bcb4a4e7ed2b45c64a43f"
+    },
+    {
+      "path": "sllm_sglang/protocol.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm_sglang/protocol.py",
+      "sha256": "0d6dd2a000bc2a941bb901b9979f5ed7876d56e8d2c2fa39c1336fd28f7a9d31"
+    },
+    {
+      "path": "sllm_sglang/runtime.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm_sglang/runtime.py",
+      "sha256": "c82208cbd3bdab7114add418e8f59d25bc472d9be654e18b606c62c49cb8e11e"
+    },
+    {
+      "path": "sllm_sglang/store_loader.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm_sglang/store_loader.py",
+      "sha256": "c8e7210ffd88c5c670b37a3a511d3a4a095e90de32a2dd90b967db5c66c67b09"
+    },
+    {
+      "path": "sllm_sglang/store_loading.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm_sglang/store_loading.py",
+      "sha256": "a7dddd87d2df59b7f2d9bad051d3ef36df5c305038af7b1a33ecb5797ebea6e8"
+    },
+    {
+      "path": "sllm_sglang/worker.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "sllm_sglang/worker.py",
+      "sha256": "1ca17c4490c124417785449c439ee1a95f14f7493e5f4fc233d903c8c583f411"
+    },
+    {
+      "path": "tests/test_backend.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "tests/test_backend.py",
+      "sha256": "04158ba1a784848679d956496bffad5e0ba53ce0c2d47c7b2bb52e8978f8118a"
+    },
+    {
+      "path": "tests/test_config.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "tests/test_config.py",
+      "sha256": "429bfb656f4432cfb37f5708f2113ad4592dce062b1992eea894e87fb8b04b2d"
+    },
+    {
+      "path": "tests/test_loading.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "tests/test_loading.py",
+      "sha256": "b153bb2ea916df35b399c265966df940755ba6d29f62a7e6c97d207e253f3bd6"
+    },
+    {
+      "path": "tests/test_protocol.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "tests/test_protocol.py",
+      "sha256": "3a668e3a119c400ca705e5ccb92f3cef40603d7c0a9f538ed297428ccd7a4b5d"
+    },
+    {
+      "path": "tests/test_runtime.py",
+      "source_snapshot": "candidate12",
+      "source_relative_path": "tests/test_runtime.py",
+      "sha256": "2143bfd759e904ee0d6c9642ede2e44b7d32fb88f0cb4229e5713ad1f0206d9c"
+    },
+    {
+      "path": "research/backend-contract/candidate/sllm/__init__.py",
+      "source_snapshot": "backend-contract-gpu-snapshot",
+      "source_relative_path": "sllm/__init__.py",
+      "sha256": "443c88507f3d7181ca4fad8fdea634f77ac48578e89bccffe0f90dbe932ffa40"
+    },
+    {
+      "path": "research/backend-contract/candidate/sllm/backends/__init__.py",
+      "source_snapshot": "backend-contract-gpu-snapshot",
+      "source_relative_path": "sllm/backends/__init__.py",
+      "sha256": "bee3c80cdbd561875e4fce2541fedbefc9d5e448cb43618a9df4a412a906e450"
+    },
+    {
+      "path": "research/backend-contract/candidate/sllm/backends/backend_utils.py",
+      "source_snapshot": "backend-contract-gpu-snapshot",
+      "source_relative_path": "sllm/backends/backend_utils.py",
+      "sha256": "0994086b56b19b69ce7baa12d11bb53ed93d061b9419e44a8a19bbfde42f098d"
+    },
+    {
+      "path": "research/backend-contract/candidate/sllm/backends/baseline_request.py",
+      "source_snapshot": "backend-contract-gpu-snapshot",
+      "source_relative_path": "sllm/backends/baseline_request.py",
+      "sha256": "e19f8932875b5b0241d0aafd9c1e8c2c85ba7e62b454385a3a9b3b57f016f3de"
+    },
+    {
+      "path": "research/backend-contract/candidate/sllm/backends/dummy_backend.py",
+      "source_snapshot": "backend-contract-gpu-snapshot",
+      "source_relative_path": "sllm/backends/dummy_backend.py",
+      "sha256": "6495efe4258af1dd1279c5ac934af5bb3e2c0d595d025c0372fd035963007369"
+    },
+    {
+      "path": "research/backend-contract/candidate/sllm/backends/sglang_backend.py",
+      "source_snapshot": "backend-contract-gpu-snapshot",
+      "source_relative_path": "sllm/backends/sglang_backend.py",
+      "sha256": "9e89ebbcef232c00db317694b7ccfe4d5301c935b5cb1a3319f63b01301ab000"
+    },
+    {
+      "path": "research/backend-contract/candidate/sllm/backends/transformers_backend.py",
+      "source_snapshot": "backend-contract-gpu-snapshot",
+      "source_relative_path": "sllm/backends/transformers_backend.py",
+      "sha256": "fbcb48f32241080cca943a4f503711c28ace662560a8f31811ed5d4d46f52521"
+    },
+    {
+      "path": "research/backend-contract/candidate/sllm/backends/vllm_backend.py",
+      "source_snapshot": "backend-contract-gpu-snapshot",
+      "source_relative_path": "sllm/backends/vllm_backend.py",
+      "sha256": "2354182fae23bf2f2abd637c9ca529bf452a82cdd0822fdd81945a71356744ab"
+    },
+    {
+      "path": "research/backend-contract/candidate/sllm_sglang/__init__.py",
+      "source_snapshot": "backend-contract-gpu-snapshot",
+      "source_relative_path": "sllm_sglang/__init__.py",
+      "sha256": "946fab3110e6f222210e82035c830e449322d5036913cd80d8fd71953faf2f0b"
+    },
+    {
+      "path": "research/backend-contract/candidate/sllm_sglang/config.py",
+      "source_snapshot": "backend-contract-gpu-snapshot",
+      "source_relative_path": "sllm_sglang/config.py",
+      "sha256": "ecea14c43cb12d98b17f298deb5cdbe234e3e883356ae6cffb446003d36e8442"
+    },
+    {
+      "path": "research/backend-contract/candidate/sllm_sglang/http_stream.py",
+      "source_snapshot": "backend-contract-gpu-snapshot",
+      "source_relative_path": "sllm_sglang/http_stream.py",
+      "sha256": "c267a4c7b0152023cb2a359780033cafa392783c0f7bcb4a4e7ed2b45c64a43f"
+    },
+    {
+      "path": "research/backend-contract/candidate/sllm_sglang/protocol.py",
+      "source_snapshot": "backend-contract-gpu-snapshot",
+      "source_relative_path": "sllm_sglang/protocol.py",
+      "sha256": "0d6dd2a000bc2a941bb901b9979f5ed7876d56e8d2c2fa39c1336fd28f7a9d31"
+    },
+    {
+      "path": "research/backend-contract/candidate/sllm_sglang/runtime.py",
+      "source_snapshot": "backend-contract-gpu-snapshot",
+      "source_relative_path": "sllm_sglang/runtime.py",
+      "sha256": "c82208cbd3bdab7114add418e8f59d25bc472d9be654e18b606c62c49cb8e11e"
+    },
+    {
+      "path": "research/backend-contract/candidate/sllm_sglang/store_loader.py",
+      "source_snapshot": "backend-contract-gpu-snapshot",
+      "source_relative_path": "sllm_sglang/store_loader.py",
+      "sha256": "48b06ef9b8484e9344551d74214fe6af9809ee9676cbe8239b06b907e737b0d3"
+    },
+    {
+      "path": "research/backend-contract/candidate/sllm_sglang/store_loading.py",
+      "source_snapshot": "backend-contract-gpu-snapshot",
+      "source_relative_path": "sllm_sglang/store_loading.py",
+      "sha256": "84a2cf3b7dc605fd47ca5505bb491fc98893fbd9ee3fdb4abf42b5d631e4080a"
+    },
+    {
+      "path": "research/backend-contract/candidate/sllm_sglang/worker.py",
+      "source_snapshot": "backend-contract-gpu-snapshot",
+      "source_relative_path": "sllm_sglang/worker.py",
+      "sha256": "50826347d0d6bae4ec0f3aa85c16b0c3a268aa51b4f4cc5ace443800615a38b3"
+    },
+    {
+      "path": "research/qwen35-store/sllm_sglang/__init__.py",
+      "source_snapshot": "qwen35-store-loader",
+      "source_relative_path": "__init__.py",
+      "sha256": "bab770258b32825a628310b2783dcf4315158567def08cc3793c30b5250e3cc6"
+    },
+    {
+      "path": "research/qwen35-store/sllm_sglang/store_loader.py",
+      "source_snapshot": "qwen35-store-loader",
+      "source_relative_path": "store_loader.py",
+      "sha256": "48b06ef9b8484e9344551d74214fe6af9809ee9676cbe8239b06b907e737b0d3"
+    },
+    {
+      "path": "research/qwen35-store/sllm_sglang/store_loading.py",
+      "source_snapshot": "qwen35-store-loader",
+      "source_relative_path": "store_loading.py",
+      "sha256": "84a2cf3b7dc605fd47ca5505bb491fc98893fbd9ee3fdb4abf42b5d631e4080a"
+    }
+  ]
+}
