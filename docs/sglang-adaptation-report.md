@@ -4,6 +4,8 @@
 
 **当前结论：Store → SGLang 生成路线已在有限模型和配置下证明可行；尚未完成保持原版 ServerlessLLM 全部目标行为的正式迁移。** 已有请求级取消实现，但不能据此认为排空停止、活动请求关闭和跨实例续写已完成。
 
+当前问题的原因、对后续模型实验的影响和逐项日志证据，集中维护于[当前问题清单](current-issues.md)。本文保留代码对照与验收范围。
+
 ## 1. 对照基准与快照范围
 
 代码对照基准为原版 ServerlessLLM 提交 [`9f50241baa5386e06a9321c51f19a9ef5f964c2b`](https://github.com/ServerlessLLM/ServerlessLLM/tree/9f50241baa5386e06a9321c51f19a9ef5f964c2b)，不是浮动的最新版。逐文件比较按文本内容进行，忽略换行符差异。
