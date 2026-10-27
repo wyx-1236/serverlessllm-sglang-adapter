@@ -2,9 +2,9 @@
 
 保存 ServerlessLLM 接入 SGLang 的研究适配代码和服务器实测使用的代码快照。当前是研究原型，完整迁移尚未验收。
 
-## 负责人阅读入口
+## 代码改动说明
 
-请先查看 [SGLang 适配改动与验证说明](docs/sglang-adaptation-report.md)：包含相对原版的逐文件改动、真实实验与 CPU 测试边界，以及尚未完成的适配和验收项。
+[SGLang 适配改动与验证说明](docs/sglang-adaptation-report.md)：包含相对原版的逐文件改动、真实实验与 CPU 测试边界，以及尚未完成的适配和验收项。
 
 ## 目录
 
