@@ -16,7 +16,7 @@
 | [`research/backend-contract/candidate/`](../research/backend-contract/candidate/) | 2026-10-16 真实后端行为观察时保存的源码，包含针对该次实验的配置调整 |
 | [`research/qwen35-store/sllm_sglang/`](../research/qwen35-store/sllm_sglang/) | Qwen3.5 原生/Store 对照使用的加载器研究副本 |
 
-根目录候选限制为 Qwen2/Qwen3、BF16、TP1，配置中 context 为 4160、RAM 门槛为 16 GiB；真实后端研究副本将 context 调为 512、RAM 门槛调为 64 GiB，并调整 worker 监督检查。Qwen3.5 研究 loader 只放行 `Qwen3_5ForConditionalGeneration`，dtype 按固定源 checkpoint 的允许集合检查。因此，**Qwen3.5 实测通过不意味着根目录代码已经直接支持 Qwen3.5**，更不能将不同副本的能力相加认作完整版本。
+根目录候选限制为 Qwen2/Qwen3、BF16、TP1，配置中 context 为 4160、RAM 门槛为 16 GiB；真实后端研究副本将 context 调为 512、RAM 门槛调为 64 GiB，并调整 worker 监督检查。Qwen3.5 研究 loader 只放行 `Qwen3_5ForConditionalGeneration`，dtype 按固定源 checkpoint 的允许集合检查。**Qwen3.5 验证结果仅适用于研究副本及对应配置；根目录候选尚未完成相关适配，统一版本需要重新验收。**
 
 源码来源和逐文件 SHA256 见 [`SOURCE-MANIFEST.json`](../SOURCE-MANIFEST.json)。该清单覆盖 Python 快照，不是完整依赖环境清单。
 

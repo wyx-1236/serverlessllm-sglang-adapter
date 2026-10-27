@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-**已测模型能从 Store 取得权重并生成正确结果；当前主要缺口是 SLLM 后端行为尚未接完整，以及研究代码没有统一为可扩展、可部署的版本。** 对更多模型的权重加载，仍需检查格式、容量和并行布局，现有两模型结果不能替代这些验证。
+**已测模型已完成 Store 权重恢复与正确生成验证；当前主要缺口为 SLLM 后端接口实现不完整，以及研究代码版本尚未统一。** 对更多模型的权重加载，仍需检查格式、容量和并行布局，现有两模型结果不能替代这些验证。
 
 | 层次 | 已验证结果 | 未验证范围 |
 |---|---|---|
@@ -34,7 +34,7 @@
 
 原版 vLLM 后端的[进度查询](../sllm/backends/vllm_backend.py#L295-L308)返回输入与已生成 token；[恢复预热](../sllm/backends/vllm_backend.py#L310-L322)把已有 token 再作为输入执行一次短生成。这里的“恢复”是重算已有 token 来建立缓存，不是直接把源 GPU 的 KV 内存复制到目标。
 
-### 实际发生了什么
+### 实测结果
 
 本次 SG 适配方法直接抛出 `NotImplementedError`。因此请求可以生成，但 SLLM 查询进度、调用预热时没有实际功能可执行。
 
@@ -45,9 +45,9 @@
 | [结果第207–208行](evidence/2026-10-16-sglang-backend/result.json#L207-L208) | 调用恢复方法得到 `result: not_implemented` |
 | [脚本第99–113行](evidence/2026-10-16-sglang-backend/backend_gpu_probe_v4.py#L99-L113) | 可看到实际调用、捕获异常并保存结果的步骤；恢复输入为固定 prompt |
 
-### 技术困难具体在哪里
+### 技术难点
 
-| 需要补的内容 | 现有代码的具体缺口 | 为什么不能只把占位方法换成一行调用 |
+| 待实现功能 | 现有代码缺口 | 实现要求 |
 |---|---|---|
 | 可查询的请求记录 | [runtime 第41–48行](../research/backend-contract/candidate/sllm_sglang/runtime.py#L41-L48)只有活动 ID 集合，输出保存在每个请求自己的 `StreamReceipt` 中 | SLLM 后端在父进程，需要一个可访问的记录/查询通道；当前局部对象不是父进程可查询的请求表 |
 | 输出持续更新和清理 | [runtime 第58–71行](../research/backend-contract/candidate/sllm_sglang/runtime.py#L58-L71)会处理每个 chunk，[第101–102行](../research/backend-contract/candidate/sllm_sglang/runtime.py#L101-L102)结束时移除 ID | 需要明确完成、取消、错误时如何更新，防止查询到已结束请求或漏掉仍在执行的请求 |
@@ -74,7 +74,7 @@ stop() → shutdown() → _terminate_child() → 向 worker 进程组发 SIGTERM
 
 ### 证据链：调用、实现、日志、结果
 
-| 顺序 | 证据 | 能确认什么 |
+| 顺序 | 证据 | 验证结果 |
 |---|---|---|
 | 1 | [脚本第99–107行](evidence/2026-10-16-sglang-backend/backend_gpu_probe_v4.py#L99-L107) | 发起 64 token 请求，观察首 chunk 后调用 stop，再检查请求结果 |
 | 2 | [SG 源码第127–150行](../research/backend-contract/candidate/sllm/backends/sglang_backend.py#L127-L150) | stop 调用 shutdown，后者终止进程组，没有活动请求归零等待 |
@@ -89,9 +89,9 @@ ValueError: Engine disconnected without a terminal result
 
 这段错误由[后端读取连接的代码](../research/backend-contract/candidate/sllm/backends/sglang_backend.py#L99-L116)在没有读到最终结果、连接已结束时抛出。日志的终止信号与源码主动关闭路径对应，原因不在权重加载。
 
-### 技术困难具体在哪里
+### 技术难点
 
-| 待解决点 | 源码依据与风险 | 完成后应检查什么 |
+| 待解决项 | 源码依据与风险 | 验收要求 |
 |---|---|---|
 | 停止接收与记录活动请求必须协调 | [generate 第83–95行](../research/backend-contract/candidate/sllm/backends/sglang_backend.py#L83-L95)检查 RUNNING，而 shutdown 使用独立生命周期锁；当前没有覆盖接收/登记/排空的完整同步流程 | stop 开始后无新请求漏入；stop 前接收的请求全部计入等待 |
 | 等待条件必须反映真实请求结束 | worker [活动集合](../research/backend-contract/candidate/sllm_sglang/runtime.py#L41-L48)和[清理](../research/backend-contract/candidate/sllm_sglang/runtime.py#L93-L102)在子进程，父进程没有排空查询流程 | 正常结束、异常和取消都能让等待正确收敛，而不提前关闭或永久等待 |
@@ -107,7 +107,7 @@ ValueError: Engine disconnected without a terminal result
 
 `shutdown()` 是原版 SLLM 已定义的接口。[后端基类](../sllm/backends/backend_utils.py#L49-L51)要求每种后端提供关闭实现。原版 vLLM [实现第265–280行](../sllm/backends/vllm_backend.py#L265-L280)先取得活动请求 ID、逐个 abort，再清理引擎。
 
-与 P2 的区别是：**P2 等待正常完成；P3 允许中止，但要让等待后端结果的 SLLM 层得到明确的取消/失败结果。** 是否重试、怎样回应 HTTP 用户属于上层处理，本轮没有验证完整 HTTP 行为。
+**P2 要求活动请求正常完成后关闭；P3 要求中止活动请求并向 SLLM 返回明确的取消或失败结果。** 请求重试策略和 HTTP 响应由上层处理，完整 HTTP 行为尚未验证。
 
 ### 实测现象与直接原因
 
@@ -129,7 +129,7 @@ ValueError: Engine disconnected without a terminal result
 | 取消与正常完成可能同时发生 | 生成任务、断连监测通过 [asyncio.wait](../research/backend-contract/candidate/sllm_sglang/runtime.py#L73-L83)并行推进 | 每个请求只能有一个确定结局，不能重复返回、遗漏通知或留下等待任务；这是待验证并发风险 |
 | 引擎无响应时不能永远等待 | [进程终止实现](../research/backend-contract/candidate/sllm/backends/sglang_backend.py#L127-L138)已有 SIGTERM/超时 SIGKILL 兜底 | 保留强制清理能力，同时使等待方得到明确错误；验证重复关闭及子进程/显存释放 |
 
-**技术阻碍：** 请求登记、取消控制、跨进程结果返回和异常回收尚未串联。现有代码已接入 SG 请求级 abort；完整主动关闭路径仍缺少真实运行成功记录。
+**技术阻碍：** 请求登记、取消控制、跨进程结果返回和异常回收尚未形成完整关闭流程。现有代码已接入 SG 请求级 abort；完整主动关闭路径仍缺少真实运行成功记录。
 
 **影响和验收：** 不否定已完成的权重加载；会阻碍活动请求关闭和异常资源回收验收。修复后至少覆盖：首 token 前关闭、生成中关闭、正常完成同时关闭、引擎不响应、重复关闭。每个请求应有明确结局，最终进程和资源应可核对回收。
 
@@ -145,7 +145,7 @@ ValueError: Engine disconnected without a terminal result
 
 **技术难点/阻碍：** 要把“某次实验允许的固定配置”整理成可维护的模型准入规则，明确不同 checkpoint 的架构、张量类型和容量；不能直接去掉检查来宣称通用支持。当前是源码差异，不是本次新增运行报错，没有相应失败日志。
 
-**影响和验收：** 下一模型实验前先统一版本和参数，冻结同一份代码做 CPU 检查及真实加载验证；三个快照不能相加当作一个已通过版本。
+**影响和验收：** 下一模型实验前先统一版本和参数，冻结同一份代码做 CPU 检查及真实加载验证；各快照的验证结果仅适用于各自代码和配置，统一版本需要重新验收。
 
 ## P5：当前 Store 加载方案对更大模型存在显存容量风险
 
@@ -157,7 +157,7 @@ ValueError: Engine disconnected without a terminal result
 
 原生与 Store 四组请求一致性的公开数据在[历史验证摘要](historical-validation-summary.json)中。这里的容量风险不能写成权重恢复失败，也不能等同于 SG 固有显存开销。
 
-**技术难点/阻碍：** 若要降低加载峰值，需要研究能否按块供给和释放源张量，同时保持 Store 传输完成约束及模型权重融合/布局处理正确；现有 Store 入口返回整份状态，不能只把外层循环改成迭代器就认定已降低 GPU 占用。多卡还涉及目标分片，不是单卡代码直接改 TP 数量即可验收。这些优化尚未实现验证。
+**技术难点/阻碍：** 降低加载峰值需要验证分块供给和释放源张量的可行性，并保持 Store 传输完成约束及模型权重融合、布局处理的正确性。现有 Store 入口返回完整状态，外层迭代方式的变化不足以证明 GPU 占用下降。多卡加载还需实现目标参数分片并独立验收；分块和多卡优化尚未完成验证。
 
 **影响和验收：** 这是后续大模型加载优先要测的风险。针对目标模型记录加载过程、驻留阶段和退出后的占用，检查完整张量与输出一致性；当前 1 秒采样不是精确峰值，不应据此直接认定更大模型一定放得下或放不下。
 
@@ -185,7 +185,7 @@ ValueError: Engine disconnected without a terminal result
 
 [experiment-process.log](evidence/2026-10-16-sglang-backend/experiment-process.log)中的 `Timeout (0:00:45)!` 来自[第30行定时线程栈打印](evidence/2026-10-16-sglang-backend/backend_gpu_probe_v4.py#L30)，不是请求超时判定。末尾 `Finished with result: success` 只表示观察程序完成，具体能力是否通过需看每个请求结果。
 
-## 下一阶段怎么推进
+## 后续工作安排
 
 若下一步目标是更多模型的权重加载，优先统一候选版本（P4）、落实 Store 准备（P7）、检查加载容量（P5），并保证实验退出清理可靠。P1 的完整迁移可以按研究需求排序；P2/P3 未修复前不能验收依赖停止、缩容或取消语义的服务实验。
 
