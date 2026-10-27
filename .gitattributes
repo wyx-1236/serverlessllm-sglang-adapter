@@ -1,0 +1,2 @@
+# Preserve archived source bytes so SOURCE-MANIFEST hashes survive cloning.
+* -text
