@@ -4,7 +4,7 @@
 
 ## 当前问题与证据
 
-[SGLang 适配当前问题：原因、技术难点与证据](docs/current-issues.md)：先说明原版 SLLM 要求什么、当前实际发生什么，再用源码、测试步骤和日志解释原因，列出尚需解决的技术困难及实验影响。
+[当前问题、技术难点与证据](docs/current-issues.md)：接口行为差异、源码原因、实验记录、技术困难和验收条件。
 
 ## 代码改动说明
 
@@ -26,7 +26,7 @@
 
 历史评估使用 SGLang 0.5.21，在 A100 40GB、BF16、TP1、context 512、文本输入和关闭图执行条件下，完成 Qwen3-0.6B 和 Qwen3.5-9B 的原生加载及真实 SLLM Store 恢复生成。Qwen3.5 四组短请求的原生/Store token 和 top5 logprobs 一致。未修改这两个模型的执行源码。
 
-这些是历史有限配置的结果，本仓库上传时没有重跑 GPU 实验。本轮停止/跟踪/重放实验的[日志、请求结果及测试脚本公开副本](docs/evidence/2026-10-16-sglang-backend/README.md)已包含在仓库中；环境身份信息的脱敏处理有清单可查。其余原始实验日志、模型权重、运行环境及凭据未包含。
+实验日期为 2026-10-16，验证范围限于上述配置。本轮停止/跟踪/重放实验的[日志、请求结果及测试脚本公开副本](docs/evidence/2026-10-16-sglang-backend/README.md)已包含在仓库中；环境身份信息的脱敏处理有清单可查。其余原始实验日志、模型权重、运行环境及凭据未包含。
 
 已测的真实后端普通生成和计量正确；活动 token 跟踪、重放/恢复、排空停止和活动请求关闭语义尚未完整适配。Controller → Ray → Engine → HTTP 全链、自动模型准备注册、多卡、量化、MoE、多模态及公平性能对照仍未完成验收。Store loader 当前可能同时保留源 GPU 权重和目标模型，存在额外显存压力。
 
@@ -51,4 +51,4 @@ Store 文件采用 `transformers/<model>` 的 HF 原始权重布局，不是旧 
 
 ## 来源与许可证
 
-SLLM 代码来源于 [ServerlessLLM](https://github.com/ServerlessLLM/ServerlessLLM)，参考本地上游提交 `9f50241baa5386e06a9321c51f19a9ef5f964c2b`，并包含研究阶段的后端接入修改和新增模块。保留原始版权声明及 Apache-2.0 `LICENSE`。原始候选和实测副本均未因本次归档修改执行逻辑。
+SLLM 代码来源于 [ServerlessLLM](https://github.com/ServerlessLLM/ServerlessLLM)，参考本地上游提交 `9f50241baa5386e06a9321c51f19a9ef5f964c2b`，并包含研究阶段的后端接入修改和新增模块。保留原始版权声明及 Apache-2.0 `LICENSE`。Python 源码快照与 `SOURCE-MANIFEST.json` 中的 SHA256 一致。
