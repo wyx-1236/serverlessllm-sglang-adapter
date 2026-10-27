@@ -1,112 +1,192 @@
-# 当前问题、原因与实验影响
+# SGLang 适配当前问题：原因、技术难点与证据
 
-更新日期：2026-10-27。本文记录当前已归档候选的问题，不表示已完成修复。真实运行证据来自 2026-10-16 的服务器实验；本次仅整理材料，没有重跑 GPU 实验。
+更新日期：2026-10-27。本文面向未参与实验的负责人。真实实验为 2026-10-16 的归档；本次只核对源码和记录，不代表已修复或重跑。
 
-**已测 Qwen3-0.6B、Qwen3.5-9B 的 Store 恢复生成已经通过有限配置验证。当前不能将停止/重放错误解释成“权重加载失败”，也不能将两模型通过扩大为任意模型可用。** 后续指定模型的加载验证可以继续准备；完整 SLLM 服务、弹性伸缩及请求迁移实验仍受下述缺口影响。
+## 先看结论：卡在哪里
 
-## 阅读证据的约定
+**已测模型能从 Store 取得权重并生成正确结果；当前主要缺口是 SLLM 后端行为尚未接完整，以及研究代码没有统一为可扩展、可部署的版本。** 对更多模型的权重加载，仍需检查格式、容量和并行布局，现有两模型结果不能替代这些验证。
 
-- **实测失败**：请求结果直接记录失败，并有测试步骤、相关日志或源码可以交叉核对。
-- **源码缺口**：实现明确缺失或受限，但没有对应配置下的真实失败日志；不补造报错。
-- **实测风险**：日志/采样观察到了现象，尚未证明一定导致故障或已确定全部原因。
-- **未验收**：没有完成目标范围验证，不能标为失败，也不能标为支持。
+| 层次 | 本次已经证明什么 | 还不能证明什么 |
+|---|---|---|
+| 权重与生成 | 已测 Qwen3-0.6B、Qwen3.5-9B 在限定配置下完成原生/Store 对照；本轮后端普通请求与自身原生参考一致 | 更大模型、MoE、量化、多卡均能通过 |
+| 请求管理 | 已观察到真实请求开始输出，也记录了停止时的失败 | 跟踪、恢复、排空停止和主动取消已保持 SLLM 原有行为 |
+| 完整系统 | 本轮测试真实后端对象、worker 和 Store | Controller、Ray 调度、HTTP 全链和自动模型准备已完成 |
 
-原始文件的[公开副本目录](evidence/2026-10-16-sglang-backend/README.md)已经包含日志、完整请求结果和实际执行脚本。仅替换服务器账号路径、物理 GPU UUID，保留全部行；[MANIFEST](evidence/2026-10-16-sglang-backend/MANIFEST.json)记录原件和公开副本摘要，本地原件未修改。
+权重加载成功有[worker 加载日志](evidence/2026-10-16-sglang-backend/worker1.log#L2-L7)及[普通请求输出一致结果](evidence/2026-10-16-sglang-backend/result.json#L168-L178)支持；完整系统未启动在[实验 scope](evidence/2026-10-16-sglang-backend/result.json#L1-L5)中明确记录。
 
-## 问题总览
+## 组件和接口是谁提供的
 
-| 编号 | 当前问题 | 证据性质 | 对下一阶段实验的影响 |
-|---|---|---|---|
-| P1 | 活动 token 跟踪、恢复/重放入口未实现 | 实测未实现 + 源码占位 | 不阻断独立加载/普通生成；阻断源请求快照与完整迁移验证 |
-| P2 | stop 终止 worker，未正常排空活动请求 | 实测失败 + worker 日志 + 源码 | 不否定已完成的加载；阻断排空、缩容等行为验收 |
-| P3 | 活动请求 shutdown 缺少正常取消终态 | 实测失败 + worker 日志 + 源码 | 影响请求关闭及异常回收验收；反复加载实验也必须落实进程组清理 |
-| P4 | Qwen3.5 研究副本尚未统一到根目录候选 | 源码差异，非新增运行报错 | 使用根目录直接扩展模型可能先被准入检查拒绝；必须先选定统一候选 |
-| P5 | Store 加载路径存在额外显存容量风险 | 实测采样 + 加载实现；本轮未观察到 OOM | 可能限制更大模型；需按目标模型测加载峰值，不能用已测结果推断所有模型 |
-| P6 | 生成期间仍发生内核编译 | worker 日志明确警告；延迟影响尚未定量 | 影响首次请求和性能口径；不能未经预热条件核对就比较时延 |
-| P7 | SG 自动准备/导出、完整服务及更多模型能力未完成 | 源码缺口 / 未验收 | 已有 Store 可支持有限验证；不能直接开展完整公平 Baseline 实验 |
+- **SLLM** 管理模型实例和请求，决定何时启动、停止或迁移。
+- **Store** 保存和传输权重；**SGLang** 使用权重执行推理。
+- **适配层**是本次新增的 `SglangBackend` 与 `sllm_sglang/`，负责让 SLLM 能控制 SG。
+- **worker** 是运行 SG 的独立进程；适配层通过私有 socket 与它交换请求、输出和结束结果。
+- **最终结果/终态**指请求明确结束：正常完成、取消或失败；收到部分 token 不代表请求已结束。
 
-## P1：活动 token 跟踪和重放没有实现
+`stop()`、`shutdown()`、`get_current_tokens()`、`resume_kv_cache()` **都是原版 SLLM 已定义的后端接口**，见[后端基类](../sllm/backends/backend_utils.py#L49-L63)。本次新增的是这些接口在 SG 后端的实现。本文以[原版 vLLM 后端](../sllm/backends/vllm_backend.py#L265-L322)的具体行为作对照，不把接口名称本身当作完整语义说明。
 
-**原因属于我们的适配层。** [后端 `get_current_tokens()` 和 `resume_kv_cache()`](../research/backend-contract/candidate/sllm/backends/sglang_backend.py#L155-L159)直接抛出 `NotImplementedError`。尚未把 SG 的流式输出、请求状态与 token 输入组织成 SLLM 的活动快照、缓存预热和跨实例续写协议。
+所有 P1–P3 源码链接均指向当次真实后端实验快照 `research/backend-contract/candidate/`。日志、请求结果和测试脚本的[公开副本](evidence/2026-10-16-sglang-backend/README.md)仅替换账号路径、物理 GPU UUID；[摘要清单](evidence/2026-10-16-sglang-backend/MANIFEST.json)可核对原件与公开副本。源码证据、运行记录和工程推断在各节分别标注。
 
-证据：
+## P1：SLLM 无法取得活动请求的 token，也无法调用恢复预热
 
-- [结果：活动请求已输出首 chunk，但 token_trace 为 not_implemented](evidence/2026-10-16-sglang-backend/result.json#L181-L196)。
-- [结果：resume_token_replay 为 not_implemented](evidence/2026-10-16-sglang-backend/result.json#L207-L208)。
-- [测试脚本：实际调用和异常捕获](evidence/2026-10-16-sglang-backend/backend_gpu_probe_v4.py#L99-L113)。
+### 预期行为与用途
 
-这是测试程序捕获异常后的结果记录，不存在对应的未捕获异常堆栈。恢复调用使用固定 prompt，并未完成一次真正的源到目标迁移。不能因此认定 SG 引擎缺少所有必要基础能力，也没有证据要求逐模型重写执行算子。
+例如请求输入 20 个 token、已经输出 30 个，SLLM 想把它转到另一实例，需要取得这 50 个 token，让目标模型处理已有内容，为继续生成做准备。
 
-推进条件：先实现适配方法并做 CPU 状态机验证，再用真实源快照检查目标续写、输出连续性、剩余预算及缓存行为。原样重跑占位方法不会解决问题。
+原版 vLLM 后端的[进度查询](../sllm/backends/vllm_backend.py#L295-L308)返回输入与已生成 token；[恢复预热](../sllm/backends/vllm_backend.py#L310-L322)把已有 token 再作为输入执行一次短生成。这里的“恢复”是重算已有 token 来建立缓存，不是直接把源 GPU 的 KV 内存复制到目标。
 
-## P2：stop 没有等待活动请求正常完成
+### 实际发生了什么
 
-**原因是当前停止策略。** [适配源码](../research/backend-contract/candidate/sllm/backends/sglang_backend.py#L128-L150)中 `stop()` 直接调用 `shutdown()`，后者向所属进程组发出 SIGTERM。请求还在生成时 worker 已退出，连接读到 EOF 而未收到最终结果；适配层因此返回缺失终态错误。
+本次 SG 适配方法直接抛出 `NotImplementedError`。因此请求可以生成，但 SLLM 查询进度、调用预热时没有实际功能可执行。
 
-证据：
+| 可直接核查的证据 | 内容及其含义 |
+|---|---|
+| [SG 后端第155–159行](../research/backend-contract/candidate/sllm/backends/sglang_backend.py#L155-L159) | 两个方法均为未实现占位；这是代码缺失的直接原因 |
+| [结果第181–196行](evidence/2026-10-16-sglang-backend/result.json#L181-L196) | 请求已输出首 token，随后查询结果为 `token_trace: not_implemented` |
+| [结果第207–208行](evidence/2026-10-16-sglang-backend/result.json#L207-L208) | 调用恢复方法得到 `result: not_implemented` |
+| [脚本第99–113行](evidence/2026-10-16-sglang-backend/backend_gpu_probe_v4.py#L99-L113) | 可看到实际调用、捕获异常并保存结果的步骤；恢复输入为固定 prompt |
 
-- [首 chunk、停止耗时及请求失败结果](evidence/2026-10-16-sglang-backend/result.json#L181-L204)：`ValueError: Engine disconnected without a terminal result`，`drained_normal_response: false`。
-- [worker1.log 第17–20行](evidence/2026-10-16-sglang-backend/worker1.log#L17-L20)：收到 SIGTERM，scheduler 以 `-15` 退出，随后清理。
-- [脚本 stop 调用与结果判定](evidence/2026-10-16-sglang-backend/backend_gpu_probe_v4.py#L103-L107)。
+### 技术困难具体在哪里
 
-`-15` 与主动终止信号一致，不应写成“SG 自发崩溃”。日志中虽然出现 `Draining requests and shutting down`，但请求结果没有正常终态，不能据此认领排空通过。
+| 需要补的内容 | 现有代码的具体缺口 | 为什么不能只把占位方法换成一行调用 |
+|---|---|---|
+| 可查询的请求记录 | [runtime 第41–48行](../research/backend-contract/candidate/sllm_sglang/runtime.py#L41-L48)只有活动 ID 集合，输出保存在每个请求自己的 `StreamReceipt` 中 | SLLM 后端在父进程，需要一个可访问的记录/查询通道；当前局部对象不是父进程可查询的请求表 |
+| 输出持续更新和清理 | [runtime 第58–71行](../research/backend-contract/candidate/sllm_sglang/runtime.py#L58-L71)会处理每个 chunk，[第101–102行](../research/backend-contract/candidate/sllm_sglang/runtime.py#L101-L102)结束时移除 ID | 需要明确完成、取消、错误时如何更新，防止查询到已结束请求或漏掉仍在执行的请求 |
+| 一致的源快照 | 测试只验证“方法未实现”，没有完成真实源到目标接续 | 源端仍在生成时复制 token，快照可能很快过期；接续边界和最终源输出必须一致，否则可能重复或遗漏内容。这是需设计/验证的风险，尚非实测故障 |
+| 目标预热及接续 | 原接口只完成预热；完整接续还涉及路由请求与输出预算 | 预热产生的额外 token 不能直接混入用户输出；还需验证缓存实际复用、剩余输出预算和源目标异常处理 |
 
-推进条件：停止接收新请求、维护活动请求集合、等待正常完成后再关闭。模型加载可行性验证可单独推进；正式缩容/排空实验需修复后重测。
+**判断与阻碍：** 已确认阻碍是适配代码缺失。已有流式 token 输出可作为实现基础，但尚未完成针对完整迁移的接口验证；不能据此承诺只补两个函数即可完成。进度跟踪主要是请求状态管理，完整跨实例接续还需要更多协议和并发验证，后者工作量更大。目前没有可靠工期估算。
 
-## P3：shutdown 没有给活动请求返回约定的取消终态
+**影响和验收：** 不阻断独立权重加载/普通生成；阻断依赖快照的迁移实验。完成条件是能查询真实活动 token，再用源快照在目标接续，验证无重复/丢失及预算正确。原样重跑未实现方法不能消除该缺口。
 
-当前实现先关闭整个 worker，尚未完成所有活动请求的请求级取消、结果收集和终态映射。它与 P2 共用进程终止路径，但目标行为不同：stop 应排空，shutdown 的取消策略则需明确并返回可识别的终态。
+## P2：stop 直接结束 worker，没有等待已有请求完成
 
-证据：
+### 预期行为与实际差异
 
-- [结果：先收到首 chunk，shutdown 后返回缺失终态错误](evidence/2026-10-16-sglang-backend/result.json#L211-L230)。
-- [worker2.log 第8–11行](evidence/2026-10-16-sglang-backend/worker2.log#L8-L11)：收到 SIGTERM，scheduler `-15` 退出。
-- [测试脚本：另一请求上的 shutdown 观察](evidence/2026-10-16-sglang-backend/backend_gpu_probe_v4.py#L114-L118)。
+`stop()` 用于撤掉实例前的正常停止：不再接收新请求，等已经接收的请求结束，再关闭。原版 vLLM [stop 实现](../sllm/backends/vllm_backend.py#L283-L293)明确设置 STOPPING 并等待活动请求数归零。
 
-[请求传输模块](../research/backend-contract/candidate/sllm_sglang/runtime.py)已有消费者断连时调用原生 abort 的路径，但不代表整体 shutdown 已正确组合该能力。此处是适配层生命周期缺口，不能解释成 SG 没有 abort 接口。
+当前 SG 实现实际执行：
 
-推进条件：关闭前处理活动请求及终态，并验证重复关闭、超时、异常启动和进程回收。已有最终清理归零记录包含外部监督清理，不等于所有资源都由后端 API 自动释放。新的加载实验也应具备可靠外部清理，不把残留显存带入下一轮。
+```text
+stop() → shutdown() → _terminate_child() → 向 worker 进程组发 SIGTERM
+```
 
-## P4：Qwen3.5 支持仍局限于独立研究副本
+**缺的是等待过程。** 请求还在生成，输出连接已经被关闭。
 
-这项是已确认的源码差异，没有新增运行失败日志。
+### 证据链：调用、实现、日志、结果
 
-- [根目录架构门禁](../sllm_sglang/store_loading.py#L19-L24)只允许 Qwen2/Qwen3 且拒绝量化；[根目录 dtype 检查](../sllm_sglang/store_loader.py#L39-L43)要求 BF16。
-- [真实后端研究副本门禁](../research/backend-contract/candidate/sllm_sglang/store_loading.py#L19-L24)针对 Qwen3.5；其 loader 按精确 checkpoint 的 dtype 集合检查。
-- 根目录 context 为 [4160](../sllm_sglang/config.py#L16-L24)，研究副本为 [512](../research/backend-contract/candidate/sllm_sglang/config.py#L16-L24)。
+| 顺序 | 证据 | 能确认什么 |
+|---|---|---|
+| 1 | [脚本第99–107行](evidence/2026-10-16-sglang-backend/backend_gpu_probe_v4.py#L99-L107) | 发起 64 token 请求，观察首 chunk 后调用 stop，再检查请求结果 |
+| 2 | [SG 源码第127–150行](../research/backend-contract/candidate/sllm/backends/sglang_backend.py#L127-L150) | stop 调用 shutdown，后者终止进程组，没有活动请求归零等待 |
+| 3 | [worker1 日志第17–20行](evidence/2026-10-16-sglang-backend/worker1.log#L17-L20) | 19:47:25 收到 SIGTERM，scheduler 以 -15 退出，随后清理 |
+| 4 | [结果第181–204行](evidence/2026-10-16-sglang-backend/result.json#L181-L204) | 先收到首 chunk，stop 用时约 5.52 秒，最终返回断连错误，`drained_normal_response: false` |
 
-因此，“Qwen3.5 研究配置已跑通”与“根目录可直接部署 Qwen3.5”是两件事。先统一代码、准入规则、环境和目标模型规格，再做下一模型验证；不要直接把三个快照拼接成一个已通过的版本。
+原始错误为：
 
-## P5：权重加载已通过，但大模型容量仍有风险
+```text
+ValueError: Engine disconnected without a terminal result
+```
 
-**没有证据表明本次 stop/shutdown 报错由权重加载失败导致。** 同轮 [worker1.log 第2–7行](evidence/2026-10-16-sglang-backend/worker1.log#L2-L7)记录 Store 恢复和确认完成；[完整请求结果](evidence/2026-10-16-sglang-backend/result.json#L7-L179)记录普通生成输出及与自身原生参考一致。
+这段错误由[后端读取连接的代码](../research/backend-contract/candidate/sllm/backends/sglang_backend.py#L99-L116)在没有读到最终结果、连接已结束时抛出。日志的终止信号与源码主动关闭路径对应，原因不在权重加载。
 
-容量风险的依据是：
+### 技术困难具体在哪里
 
-- [104 条资源采样](evidence/2026-10-16-sglang-backend/gpu-samples.json)中，GPU 显存采样最大值为 **37,482 MiB（约 36.6 GiB）**，不是精确瞬时峰值。
-- [Store 读取代码](../sllm_sglang/store_loading.py#L28-L36)先获得 CUDA 张量状态，再由 loader 将其交给原生模型加载。这一实现支持“源权重与目标参数可能共存”的判断，但采样本身不能精确拆分每部分占用。
-- [历史原生/Store 对照摘要](historical-validation-summary.json)记录 Qwen3.5 四组 token/logprob 对照通过；不是全部模型的加载资格证明。
+| 待解决点 | 源码依据与风险 | 完成后应检查什么 |
+|---|---|---|
+| 停止接收与记录活动请求必须协调 | [generate 第83–95行](../research/backend-contract/candidate/sllm/backends/sglang_backend.py#L83-L95)检查 RUNNING，而 shutdown 使用独立生命周期锁；当前没有覆盖接收/登记/排空的完整同步流程 | stop 开始后无新请求漏入；stop 前接收的请求全部计入等待 |
+| 等待条件必须反映真实请求结束 | worker [活动集合](../research/backend-contract/candidate/sllm_sglang/runtime.py#L41-L48)和[清理](../research/backend-contract/candidate/sllm_sglang/runtime.py#L93-L102)在子进程，父进程没有排空查询流程 | 正常结束、异常和取消都能让等待正确收敛，而不提前关闭或永久等待 |
+| 排空超时的处理必须明确 | 当前代码没有单独的排空流程 | 请求长时间不结束时，转入可识别的取消/失败路径，再释放进程 |
 
-本轮没有记录 OOM，不能将容量风险写成已发生 OOM。后续更大模型、MoE、量化及 TP 多卡仍需逐项验证；可能需要降低源权重共存峰值或调整准备/分片流程。这是后续模型扩展的关键工作，优先级高于与首批加载实验无关的完整迁移功能。
+**判断与阻碍：** 属于后端生命周期适配，核心是跨进程请求计数和并发顺序，并非模型执行代码问题。需要补正常排空及超时兜底；已知代码路径足以说明当前失败原因，无需先原样重跑定位。
 
-## P6：首轮生成期间存在编译开销
+**影响和验收：** 普通加载/生成已通过的结果仍成立；依赖实例缩容、排空停止的实验不能认领通过。修复后需在生成中调用 stop，确认完整输出、正常结束、新请求拒绝及最终资源释放。
 
-[worker1.log 第10–16行](evidence/2026-10-16-sglang-backend/worker1.log#L10-L16)多次记录 Triton 内核在服务开始后编译，单次约 1.01–1.35 秒，并提示可能阻塞引擎。这是实测日志中的性能警告，没有导致本轮普通生成正确性失败。
+## P3：shutdown 关闭实例时，没有先让活动请求得到明确取消结果
 
-需要核实编译/预热完成边界，再比较首请求或稳态性能。当前没有完整时间线证明负责人此前全部服务等待时间都来自这些编译，也不能据此归因 Ceph、Store 或 SG 的整体性能。
+### 接口原本就有，SG 实现尚未保留原有行为
 
-## P7：自动准备、完整服务和模型覆盖仍未验收
+`shutdown()` 不是本次新发明的操作。原版 SLLM [后端基类](../sllm/backends/backend_utils.py#L49-L51)要求实现它，原版 vLLM [实现第265–280行](../sllm/backends/vllm_backend.py#L265-L280)先取得活动请求 ID、逐个 abort，再清理引擎。
 
-- [StoreManager 的 SG 分支](../sllm/store_manager.py#L427-L436)明确仅接收已存在并校验的 Store 文件，没有自动下载/导出分支。原版 vLLM 处理后的 rank 布局不能直接当成当前 HF 布局输入。
-- [结果 scope](evidence/2026-10-16-sglang-backend/result.json#L1-L5)明确本轮未启动 Controller/Ray/HTTP；普通后端对象通过不能替代完整服务资格。
-- Embedding、Chat 模板通用接入、LoRA、长上下文、更多架构、量化、多模态和 TP 多卡没有完成对应验收，不能笼统写为“模型不支持”或“已支持”。
+与 P2 的区别是：**P2 等待正常完成；P3 允许中止，但要让等待后端结果的 SLLM 层得到明确的取消/失败结果。** 是否重试、怎样回应 HTTP 用户属于上层处理，本轮没有验证完整 HTTP 行为。
 
-另有历史材料记录原生 Store writer 不完整、使用 CPU 参考 writer 完成研究对照；本仓库当前未提供该 writer 失败的完整原始日志链。该问题仍列在[适配报告](sglang-adaptation-report.md)的准备流程缺口中，但不以这里的 stop/shutdown 日志充当其证据，也不把它算成 SG 特有故障。补齐日志前不得标为已修复。
+### 实测现象与直接原因
 
-## 哪些日志不能当作故障结论
+当前 [SG shutdown](../research/backend-contract/candidate/sllm/backends/sglang_backend.py#L127-L147)设置删除状态后结束 worker，没有先遍历活动请求执行取消并收集结束结果。
 
-[experiment-process.log](evidence/2026-10-16-sglang-backend/experiment-process.log)中的 `Timeout (0:00:45)!` 来自[脚本的定时线程栈打印](evidence/2026-10-16-sglang-backend/backend_gpu_probe_v4.py#L30)，不能单独认定为请求超时；`Finished with result: success` 只表示观察程序退出成功，不能证明每项能力通过。
+| 证据 | 内容及结论 |
+|---|---|
+| [脚本第114–118行](evidence/2026-10-16-sglang-backend/backend_gpu_probe_v4.py#L114-L118) | 重新发起请求，看到首 chunk 后调用 shutdown |
+| [结果第211–230行](evidence/2026-10-16-sglang-backend/result.json#L211-L230) | 请求已输出，约 5.74 秒关闭后得到相同的 `Engine disconnected without a terminal result` |
+| [worker2 日志第8–11行](evidence/2026-10-16-sglang-backend/worker2.log#L8-L11) | 19:47:54 收到 SIGTERM，scheduler -15 退出，随后清理 |
 
-## 对下一阶段的建议
+### 为什么不是“加一行 abort 就好了”
 
-先统一首批模型的候选版本，补齐 CPU 侧准备、Store 文件校验和可靠退出清理，再申请短时 GPU 验证原生/Store 一致性和加载容量。P1 的完整迁移能力可按实验目标安排，但 P2/P3 未完成时，不进行依赖排空或迁移语义的正式对照。修复后必须回归验证，不能仅修改文档即认领完成。
+| 技术困难 | 已有代码的具体依据 | 必须补齐/验证的行为 |
+|---|---|---|
+| 关闭端需要知道该取消哪些请求 | [runtime 第41–48行](../research/backend-contract/candidate/sllm_sglang/runtime.py#L41-L48)中 caller ID、原生 ID 和 receipt 是请求内部变量；活动集合仅保存 caller ID | 让整体关闭流程能够定位每个活动请求的原生 ID，且不取消错请求 |
+| 已有 abort 路径没有接成整体关闭流程 | [runtime 第84–102行](../research/backend-contract/candidate/sllm_sglang/runtime.py#L84-L102)在断连/异常时会调用 `abort_request(native_id)`，随后做任务清理 | 明确主动关闭时如何逐个取消、等待结果并通知父进程；发送取消指令不等于调用方已收到结果 |
+| 当前结果转换不接受取消类型 | [protocol 第78–89行](../research/backend-contract/candidate/sllm_sglang/protocol.py#L78-L89)要求有已生成输出，结束原因只能是 `stop` 或 `length` | 定义取消响应和部分输出处理；即使引擎取消成功，现有转换也不能直接认领兼容；未输出首 token 就取消也需覆盖 |
+| 取消与正常完成可能同时发生 | 生成任务、断连监测通过 [asyncio.wait](../research/backend-contract/candidate/sllm_sglang/runtime.py#L73-L83)并行推进 | 每个请求只能有一个确定结局，不能重复返回、遗漏通知或留下等待任务；这是待验证并发风险 |
+| 引擎无响应时不能永远等待 | [进程终止实现](../research/backend-contract/candidate/sllm/backends/sglang_backend.py#L127-L138)已有 SIGTERM/超时 SIGKILL 兜底 | 保留强制清理能力，同时使等待方得到明确错误；验证重复关闭及子进程/显存释放 |
+
+**判断与阻碍：** 这是有明确代码依据的适配缺口，涉及请求登记、取消控制、跨进程结果返回和异常回收，不能只改函数名或加一个调用。现有代码已使用 SG 的请求级 abort，说明有基础接入；但尚未对完整主动关闭路径做成功验证，因此不承诺具体工期，也不把模拟测试当作真实取消验收。
+
+**影响和验收：** 不否定已完成的权重加载；会阻碍活动请求关闭和异常资源回收验收。修复后至少覆盖：首 token 前关闭、生成中关闭、正常完成同时关闭、引擎不响应、重复关闭。每个请求应有明确结局，最终进程和资源应可核对回收。
+
+## P4：Qwen3.5 的成功来自研究副本，根目录版本尚未统一
+
+**具体问题：** 根目录候选只放行 Qwen2/Qwen3；Qwen3.5 在研究副本放行架构和实际 dtype 后才完成实测。负责人拿根目录版本运行，不能直接复现研究副本的模型范围。
+
+| 证据 | 根目录候选 | 真实后端研究副本 |
+|---|---|---|
+| 架构检查 | [只放行 Qwen2/Qwen3](../sllm_sglang/store_loading.py#L19-L24) | [只放行此次 Qwen3.5 架构](../research/backend-contract/candidate/sllm_sglang/store_loading.py#L19-L24) |
+| dtype 检查 | [统一检查 BF16](../sllm_sglang/store_loader.py#L39-L43) | [检查固定 checkpoint 的允许集合](../research/backend-contract/candidate/sllm_sglang/store_loader.py#L39-L43) |
+| context | [4160](../sllm_sglang/config.py#L16-L24) | [512](../research/backend-contract/candidate/sllm_sglang/config.py#L16-L24) |
+
+**技术难点/阻碍：** 要把“某次实验允许的固定配置”整理成可维护的模型准入规则，明确不同 checkpoint 的架构、张量类型和容量；不能直接去掉检查来宣称通用支持。当前是源码差异，不是本次新增运行报错，没有相应失败日志。
+
+**影响和验收：** 下一模型实验前先统一版本和参数，冻结同一份代码做 CPU 检查及真实加载验证；三个快照不能相加当作一个已通过版本。
+
+## P5：当前 Store 加载方案对更大模型存在显存容量风险
+
+### 已观察事实与原因判断分开看
+
+- **已观察：** 本轮 Qwen3.5 普通请求生成成功；[104 条采样](evidence/2026-10-16-sglang-backend/gpu-samples.json)中显存最大值为 37,482 MiB（约 36.6 GiB）。本轮未记录 OOM。
+- **源码依据：** [Store 读取](../research/backend-contract/candidate/sllm_sglang/store_loading.py#L28-L36)先得到一份 CUDA 张量状态，再由 [loader](../research/backend-contract/candidate/sllm_sglang/store_loader.py#L35-L43)逐项交给原生加载流程。源权重在消费过程中可能与目标参数共存。
+- **工程判断：** 额外权重共存可能增加加载需求，但现有采样不能精确拆分源权重、目标参数、KV 缓存等占用，尚未证明它是全部差值的原因。
+
+原生与 Store 四组请求一致性的公开数据在[历史验证摘要](historical-validation-summary.json)中。这里的容量风险不能写成权重恢复失败，也不能等同于 SG 固有显存开销。
+
+**技术难点/阻碍：** 若要降低加载峰值，需要研究能否按块供给和释放源张量，同时保持 Store 传输完成约束及模型权重融合/布局处理正确；现有 Store 入口返回整份状态，不能只把外层循环改成迭代器就认定已降低 GPU 占用。多卡还涉及目标分片，不是单卡代码直接改 TP 数量即可验收。这些优化尚未实现验证。
+
+**影响和验收：** 这是后续大模型加载优先要测的风险。针对目标模型记录加载过程、驻留阶段和退出后的占用，检查完整张量与输出一致性；当前 1 秒采样不是精确峰值，不应据此直接认定更大模型一定放得下或放不下。
+
+## P6：首次请求期间仍有内核编译，性能测量条件未统一
+
+**现象证据：** [worker1 日志第10–16行](evidence/2026-10-16-sglang-backend/worker1.log#L10-L16)明确记录服务开始后 Triton 内核编译，单次约 1.01–1.35 秒。普通请求仍成功，这是性能警告，不是生成正确性失败。
+
+**技术难点/阻碍：** 需要识别目标模型/输入形状实际会触发哪些编译，划清引擎就绪、预热完成、首请求和稳态测量边界。仅有这几条日志，不能量化全部端到端等待时间，更不能将原生路径和 Store 路径的不同预热状态直接比较。
+
+**影响和验收：** 可以继续做加载正确性验证；性能实验需记录编译/缓存条件和完整时间线，再比较首次请求及稳态指标。这里没有证据认定负责人此前全部等待时间都来自编译。
+
+## P7：现有文件能恢复，不等于自动准备和完整服务已经接通
+
+| 具体缺口 | 证据 | 技术工作与验收阻碍 |
+|---|---|---|
+| SG 没有自动下载/导出准备分支 | [StoreManager 第427–436行](../sllm/store_manager.py#L427-L436)只检查已有 Store 文件 | 需要接通 HF 布局文件生成、索引/张量校验、注册与失败回收；旧 vLLM 处理后的 rank 布局不能直接复用为当前输入 |
+| 本轮没有启动完整服务链 | [result scope](evidence/2026-10-16-sglang-backend/result.json#L1-L5)明确未启动 Controller/Ray/HTTP | 需验证真实调度、后端启动、HTTP 流式、断连和退出，不能用内部 chunk 正确替代 |
+| 更多功能/模型没有对应资格记录 | [候选协议](../sllm_sglang/protocol.py#L16-L31)限定 raw IDs、贪心和输出预算，[架构检查](../sllm_sglang/store_loading.py#L19-L24)范围有限 | Chat/Embedding、LoRA、MoE、量化、多模态、长上下文、多卡应按目标需要逐项接入和验证；缺记录不等于全部已失败 |
+
+历史报告还记载原生 Store writer 文件不完整、研究阶段使用 CPU 参考 writer。本仓库尚未提供该失败的完整原始日志链，因此只能列为待补证据的准备流程问题，不能把 stop/shutdown 日志当作它的证据，也不能认领已修复。详见[代码与验证报告](sglang-adaptation-report.md)。
+
+## 如何理解日志中的其他文字
+
+`NotImplementedError` 被[测试脚本](evidence/2026-10-16-sglang-backend/backend_gpu_probe_v4.py#L99-L113)捕获并保存为 `not_implemented`，因此没有对应未捕获异常堆栈。这不影响 P1“方法尚未实现”的源码和运行证据。
+
+[experiment-process.log](evidence/2026-10-16-sglang-backend/experiment-process.log)中的 `Timeout (0:00:45)!` 来自[第30行定时线程栈打印](evidence/2026-10-16-sglang-backend/backend_gpu_probe_v4.py#L30)，不是请求超时判定。末尾 `Finished with result: success` 只表示观察程序完成，具体能力是否通过需看每个请求结果。
+
+## 下一阶段怎么推进
+
+若下一步目标是更多模型的权重加载，优先统一候选版本（P4）、落实 Store 准备（P7）、检查加载容量（P5），并保证实验退出清理可靠。P1 的完整迁移可以按研究需求排序；P2/P3 未修复前不能验收依赖停止、缩容或取消语义的服务实验。
+
+本文描述的是代码缺口、实测结果和待验证技术风险，没有把某项标为已修复。修复后先做 CPU 状态与异常路径检查，再另行申请短时 GPU 验证；已有归档不足以承诺总工期或全部模型适配成功。
