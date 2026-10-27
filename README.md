@@ -15,7 +15,7 @@
 - `sllm/`：包含 SGLang 后端接入的 SLLM 源码快照。保留相关原版模块，使调用关系可追溯。
 - `sllm_sglang/`：worker、进程通信、请求转换、流式适配、运行配置及自定义 Store loader。
 - `tests/`：candidate12 已有的 CPU 单元测试。
-- `research/backend-contract/candidate/`：2026-10-16 真实后端行为实测归档中的源码副本，独立保存，不覆盖 candidate12。
+- `research/backend-contract/candidate/`：2026-10-16 用于测试真实 SLLM 后端行为的一份实验代码快照，独立保存，不覆盖 candidate12。
 - `research/qwen35-store/sllm_sglang/`：Qwen3.5 Store 恢复生成实测使用的 loader 副本。
 - `SOURCE-MANIFEST.json`：每个 Python 文件的来源快照及 SHA256，所有源文件按原字节保存。
 - `CANDIDATE-NOTES.md`：准备候选原始说明，反映当时阶段状态；其中外部笔记和结果路径未包含在本仓库。
